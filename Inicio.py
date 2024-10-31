@@ -10,8 +10,8 @@ st.markdown("""
 
 
 # Título y subtítulo
-st.title("Proyecto Integrador: Fire Developer")
-st.subheader("Un Viaje Creativo con [Nombre del Equipo]")
+st.title("Proyecto Integrador: Panel de Control de Asistencia de Empleados")
+st.subheader("Fire Developer")
 
 # Imagen de fondo
 image = Image.open("./static/proyecto integrador.png") 
@@ -20,21 +20,26 @@ st.image(image, width=700, use_column_width=True)
 # Integrantes
 st.header("Nuestro Equipo")
 
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.image("./static/user.png", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static\datasets\DANNY .jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**DANNY EDISON IDARRAGA GOMEZ**")
     st.write("[Rol en el proyecto]")
 
 with col2:
-    st.image("./static/user.png", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static\datasets\EDUAR.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**JORGE EDUARDO MUÑOZ QUINTERO**")
     st.write("[Rol en el proyecto]")
     
 with col3:
-    st.image("./static/user.png", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static\datasets\JHONATAN.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**JHONATAN RODRIGUEZ MUÑOZ**")
+    st.write("[Rol en el proyecto]")
+    
+with col4:
+    st.image("./static\datasets\SERGIO.jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.write("**SERGIO MARENCO**")
     st.write("[Rol en el proyecto]")
     
     
