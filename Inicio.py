@@ -23,22 +23,22 @@ st.header("Nuestro Equipo")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.image("./static\datasets\DANNY .jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static/images/DANNY .jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**DANNY EDISON IDARRAGA GOMEZ**")
     st.write("[Rol en el proyecto]")
 
 with col2:
-    st.image("./static\datasets\EDUAR.jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static/images/EDUAR.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**JORGE EDUARDO MUÑOZ QUINTERO**")
     st.write("[Rol en el proyecto]")
     
 with col3:
-    st.image("./static\datasets\JHONATAN.jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static/images/JHONATAN.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**JHONATAN RODRIGUEZ MUÑOZ**")
     st.write("[Rol en el proyecto]")
     
 with col4:
-    st.image("./static\datasets\SERGIO.jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static/images/SERGIO.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**SERGIO MARENCO**")
     st.write("[Rol en el proyecto]")
     
