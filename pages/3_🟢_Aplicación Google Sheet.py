@@ -52,6 +52,7 @@ if st.button("Analizar datos de Google Sheet"):
         'Columna1': ['Nuevo1', 'Nuevo2', 'Nuevo3'],
         'Columna2': [1, 2, 3],
         'Columna3': ['A', 'B', 'C']
+         'Columna4': ['#', '%', '=']
     })
 
      # Actualizar la hoja de cálculo
