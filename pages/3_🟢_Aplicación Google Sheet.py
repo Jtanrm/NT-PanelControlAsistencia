@@ -9,7 +9,10 @@ st.subheader("Analizador de Datos de Google Sheets")
 
 st.markdown("""
 Este código lee datos de una hoja de cálculo de Google Sheets llamada "Sheet1", los procesa con Pandas y actualiza una segunda hoja llamada "Sheet2" con nuevos datos. La interfaz de usuario de Streamlit permite al usuario ingresar el ID de la hoja de cálculo y visualizar los datos procesados.            
-    """)   
+    """)  
+
+st.text('id documento datos_proyecto')
+st.text('1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y') 
 
 # If modifying these scopes, delete the file token.json.
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
@@ -50,8 +53,8 @@ if st.button("Analizar datos de Google Sheet"):
         'Columna2': [1, 2, 3],
         'Columna3': ['A', 'B', 'C']
     })
-    
-    # Actualizar la hoja de cálculo
+
+     # Actualizar la hoja de cálculo
     result = update_sheet(df_update)
     st.header("Datos hoja2")
     st.success(f"Hoja actualizada. {result.get('updatedCells')} celdas actualizadas.")
