@@ -51,7 +51,7 @@ if st.button("Analizar datos de Google Sheet"):
     df_update = pd.DataFrame({
         'Columna1': ['Nuevo1', 'Nuevo2', 'Nuevo3'],
         'Columna2': [1, 2, 3],
-        'Columna3': ['A', 'B', 'C']
+        'Columna3': ['A', 'B', 'C'],
         'Columna4': ['#', '%', '=']
     })
 
