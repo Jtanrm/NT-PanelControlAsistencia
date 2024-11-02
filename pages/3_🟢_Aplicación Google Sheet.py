@@ -20,8 +20,8 @@ SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 
 # The ID and range of a sample spreadsheet.
 SPREADSHEET_ID = st.text_input("ID  hoja de cálculo")
-RANGE1 = "Sheet1!A:E"
-RANGE2 = "Sheet2!A:E"
+RANGE1 = "Sheet1!A:O"
+RANGE2 = "Sheet2!A:O"
 
 google_sheet_credentials = st.secrets["GOOGLE_SHEET_CREDENTIALS"]  
 secrets_dict = google_sheet_credentials.to_dict()     
