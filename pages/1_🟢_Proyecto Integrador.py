@@ -4,6 +4,7 @@ import streamlit as st
 import pandas as pd  
 import firebase_admin  
 from firebase_admin import credentials, firestore  
+from datetime import datetime, timedelta
 
 st.set_page_config(layout="wide")
 
@@ -34,8 +35,11 @@ with tad_descripcion:
     st.markdown('''   
 
     ### Introducción
+                
+    -   En una empresa con un número significativo de empleados, el Administrador enfrenta serias dificultades para gestionar la asistencia debido a registros manuales y hojas de cálculo. Esta falta de un sistema centralizado provoca errores en el cálculo de horas trabajadas y dificultades en la generación de reportes precisos. La necesidad de un sistema que permita el seguimiento eficiente y preciso de la asistencia se vuelve evidente para optimizar la gestión del personal y facilitar la toma de decisiones.
 
     -   ¿Qué es el proyecto?
+                El Panel de Control de Asistencia de Empleados es una aplicación que permite al Administrador gestionar y monitorear la asistencia de los empleados de manera eficiente. La aplicación está diseñada para centralizar el registro de asistencia, ausencias y tardanzas, y facilitar la generación de reportes detallados sobre la asistencia de los empleados.
     -   ¿Cuál es el objetivo principal?
     -   ¿Por qué es importante?
 
@@ -59,98 +63,139 @@ with tad_descripcion:
 with tab_Generador:
     st.write('Esta función Python genera datos ficticios de usuarios y productos y los carga en una base de datos Firestore, proporcionando una interfaz sencilla para controlar la cantidad de datos generados y visualizar los resultados.')
     # Inicializar Faker para Colombia
-    fake = Faker('es_CO')
+   # fake = Faker('es_CO')
 
-    # Lista de ciudades colombianas
-    ciudades_colombianas = [
-        'Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Cartagena', 
-        'Cúcuta', 'Bucaramanga', 'Pereira', 'Santa Marta', 'Ibagué',
-        'Pasto', 'Manizales', 'Neiva', 'Villavicencio', 'Armenia'
-    ]
+    # # Lista de ciudades colombianas
+    # ciudades_colombianas = [
+    #     'Bogotá', 'Medellín', 'Cali', 'Barranquilla', 'Cartagena', 
+    #     'Cúcuta', 'Bucaramanga', 'Pereira', 'Santa Marta', 'Ibagué',
+    #     'Pasto', 'Manizales', 'Neiva', 'Villavicencio', 'Armenia'
+    # ]
 
-    def generate_fake_users(n):
-        users = []
-        for _ in range(n):
-            user = {
-                'nombre': fake.name(),
-                'email': fake.email(),
-                'edad': random.randint(18, 80),
-                'ciudad': random.choice(ciudades_colombianas)
-            }
-            users.append(user)
-        return users
+    # def generate_fake_users(n):
+    #     users = []
+    #     for _ in range(n):
+    #         user = {
+    #             'nombre': fake.name(),
+    #             'email': fake.email(),
+    #             'edad': random.randint(18, 80),
+    #             'ciudad': random.choice(ciudades_colombianas)
+    #         }
+    #         users.append(user)
+    #     return users
 
-    def generate_fake_products(n):
-        categories = {
-            'Electrónica': [
-                'Celular', 'Portátil', 'Tablet', 'Audífonos', 'Reloj inteligente', 
-                'Cámara digital', 'Parlante Bluetooth', 'Batería portátil', 
-                'Monitor', 'Teclado inalámbrico'
-            ],
-            'Ropa': [
-                'Camiseta', 'Jean', 'Vestido', 'Chaqueta', 'Zapatos', 
-                'Sudadera', 'Medias', 'Ruana', 'Gorra', 'Falda'
-            ],
-            'Hogar': [
-                'Lámpara', 'Cojín', 'Cortinas', 'Olla', 'Juego de sábanas', 
-                'Toallas', 'Espejo', 'Reloj de pared', 'Tapete', 'Florero'
-            ],
-            'Deportes': [
-                'Balón de fútbol', 'Raqueta de tenis', 'Pesas', 
-                'Colchoneta de yoga', 'Bicicleta', 'Tenis para correr', 
-                'Maletín deportivo', 'Termo', 'Guantes de boxeo', 'Lazo para saltar'
-            ]
+    # def generate_fake_products(n):
+    #     categories = {
+    #         'Electrónica': [
+    #             'Celular', 'Portátil', 'Tablet', 'Audífonos', 'Reloj inteligente', 
+    #             'Cámara digital', 'Parlante Bluetooth', 'Batería portátil', 
+    #             'Monitor', 'Teclado inalámbrico'
+    #         ],
+    #         'Ropa': [
+    #             'Camiseta', 'Jean', 'Vestido', 'Chaqueta', 'Zapatos', 
+    #             'Sudadera', 'Medias', 'Ruana', 'Gorra', 'Falda'
+    #         ],
+    #         'Hogar': [
+    #             'Lámpara', 'Cojín', 'Cortinas', 'Olla', 'Juego de sábanas', 
+    #             'Toallas', 'Espejo', 'Reloj de pared', 'Tapete', 'Florero'
+    #         ],
+    #         'Deportes': [
+    #             'Balón de fútbol', 'Raqueta de tenis', 'Pesas', 
+    #             'Colchoneta de yoga', 'Bicicleta', 'Tenis para correr', 
+    #             'Maletín deportivo', 'Termo', 'Guantes de boxeo', 'Lazo para saltar'
+    #         ]
+    #     }
+
+    #     products = []
+    #     for _ in range(n):
+    #         category = random.choice(list(categories.keys()))
+    #         product_type = random.choice(categories[category])
+            
+    #         product = {
+    #             'nombre': product_type,
+    #             'precio': round(random.uniform(10000, 1000000), -3),  # Precios en pesos colombianos
+    #             'categoria': category,
+    #             'stock': random.randint(0, 100)
+    #         }
+    #         products.append(product)
+    #     return products
+
+    # def delete_collection(collection_name):
+    #     docs = db.collection(collection_name).get()
+    #     for doc in docs:
+    #         doc.reference.delete()
+
+    # def add_data_to_firestore(collection, data):
+    #     for item in data:
+    #         db.collection(collection).add(item)
+    
+    # col1, col2 = st.columns(2)
+
+    # with col1:
+    #     st.subheader('Usuarios')
+    #     num_users = st.number_input('Número de usuarios a generar', min_value=1, max_value=100, value=10)
+    #     if st.button('Generar y Añadir Usuarios'):
+    #         with st.spinner('Eliminando usuarios existentes...'):
+    #             delete_collection('usuarios')
+    #         with st.spinner('Generando y añadiendo nuevos usuarios...'):
+    #             users = generate_fake_users(num_users)
+    #             add_data_to_firestore('usuarios', users)
+    #         st.success(f'{num_users} usuarios añadidos a Firestore')
+    #         st.dataframe(pd.DataFrame(users))
+
+    # with col2:
+    #     st.subheader('Productos')
+    #     num_products = st.number_input('Número de productos a generar', min_value=1, max_value=100, value=10)
+    #     if st.button('Generar y Añadir Productos'):
+    #         with st.spinner('Eliminando productos existentes...'):
+    #             delete_collection('productos')
+    #         with st.spinner('Generando y añadiendo nuevos productos...'):
+    #             products = generate_fake_products(num_products)
+    #             add_data_to_firestore('productos', products)
+    #         st.success(f'{num_products} productos añadidos a Firestore')
+    #         st.dataframe(pd.DataFrame(products))
+
+    # Crear instancia de Faker
+    fake = Faker()
+
+    # Función para generar fechas aleatorias
+    def generar_fechas(asistencias_count=1, ausencias_count=1):
+        fecha_base = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        asistencias = []
+        ausencias = []
+
+        for _ in range(asistencias_count):
+            hora_asistencia = fecha_base + timedelta(hours=random.randint(6, 9), minutes=random.randint(0, 59))
+            asistencias.append(hora_asistencia)
+
+        for _ in range(ausencias_count):
+            hora_asistencia = fecha_base + timedelta(hours=random.randint(10, 17), minutes=random.randint(0, 59))
+            ausencias.append(hora_asistencia)
+
+        return asistencias, ausencias
+
+    # Generar 100 empleados
+    for _ in range(100):
+        nombre = fake.first_name()
+        apellido = fake.last_name()
+        email = fake.email()
+        fecha_contratacion = fake.date_between(start_date='-5y', end_date='today')
+
+        asistencias, ausencias = generar_fechas()
+
+        empleado = {
+            'nombre': nombre,
+            'apellido': apellido,
+            'email': email,
+            'fechaContratacion': fecha_contratacion.isoformat(),
+            'asistencias': [timestamp.isoformat() for timestamp in asistencias],
+            'ausencias': [timestamp.isoformat() for timestamp in ausencias]
         }
 
-        products = []
-        for _ in range(n):
-            category = random.choice(list(categories.keys()))
-            product_type = random.choice(categories[category])
-            
-            product = {
-                'nombre': product_type,
-                'precio': round(random.uniform(10000, 1000000), -3),  # Precios en pesos colombianos
-                'categoria': category,
-                'stock': random.randint(0, 100)
-            }
-            products.append(product)
-        return products
+        # Guardar en Firebase
+        db.collection('empleados').add(empleado)
 
-    def delete_collection(collection_name):
-        docs = db.collection(collection_name).get()
-        for doc in docs:
-            doc.reference.delete()
-
-    def add_data_to_firestore(collection, data):
-        for item in data:
-            db.collection(collection).add(item)
-    
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.subheader('Usuarios')
-        num_users = st.number_input('Número de usuarios a generar', min_value=1, max_value=100, value=10)
-        if st.button('Generar y Añadir Usuarios'):
-            with st.spinner('Eliminando usuarios existentes...'):
-                delete_collection('usuarios')
-            with st.spinner('Generando y añadiendo nuevos usuarios...'):
-                users = generate_fake_users(num_users)
-                add_data_to_firestore('usuarios', users)
-            st.success(f'{num_users} usuarios añadidos a Firestore')
-            st.dataframe(pd.DataFrame(users))
-
-    with col2:
-        st.subheader('Productos')
-        num_products = st.number_input('Número de productos a generar', min_value=1, max_value=100, value=10)
-        if st.button('Generar y Añadir Productos'):
-            with st.spinner('Eliminando productos existentes...'):
-                delete_collection('productos')
-            with st.spinner('Generando y añadiendo nuevos productos...'):
-                products = generate_fake_products(num_products)
-                add_data_to_firestore('productos', products)
-            st.success(f'{num_products} productos añadidos a Firestore')
-            st.dataframe(pd.DataFrame(products))
-
+        print("Datos generados y guardados en Firebase.")
 #----------------------------------------------------------
 #Datos
 #----------------------------------------------------------

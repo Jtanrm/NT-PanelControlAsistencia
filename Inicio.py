@@ -47,7 +47,12 @@ with col4:
 # Descripción del proyecto
 st.header("Sobre el Proyecto")
 st.write("""
-[Escribe aquí una breve descripción del proyecto, incluyendo el objetivo principal, la problemática que aborda y el enfoque que se utiliza. Puedes ser creativo y usar un lenguaje atractivo.]
+En una empresa con un número significativo de empleados, el Administrador enfrenta serias dificultades para gestionar la asistencia debido a registros manuales y hojas de cálculo. Esta falta de un sistema centralizado provoca errores en el cálculo de horas trabajadas y dificultades en la generación de reportes precisos. La necesidad de un sistema que permita el seguimiento eficiente y preciso de la asistencia se vuelve evidente para optimizar la gestión del personal y facilitar la toma de decisiones.
+
+    -   ¿Qué es el proyecto?
+                El Panel de Control de Asistencia de Empleados es una aplicación que permite al Administrador gestionar y monitorear la asistencia de los empleados de manera eficiente. La aplicación está diseñada para centralizar el registro de asistencia, ausencias y tardanzas, y facilitar la generación de reportes detallados sobre la asistencia de los empleados.
+    -   ¿Cuál es el objetivo principal?
+    -   ¿Por qué es importante?
 """)
 
 # Más información
