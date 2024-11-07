@@ -10,7 +10,7 @@ st.markdown("""
 
 
 # Título y subtítulo
-st.title("Proyecto Integrador: Panel de Control de Asistencia de Empleados")
+st.title("Panel de Control de Asistencia de Empleados")
 st.subheader("Fire Developer")
 
 # Imagen de fondo
@@ -25,29 +25,30 @@ col1, col2, col3, col4 = st.columns(4)
 with col1:
     st.image("./static\datasets\DANNY .jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**DANNY EDISON IDARRAGA GOMEZ**")
-    st.write("[Rol en el proyecto]")
+    st.write(" Scrum Master")
 
 with col2:
     st.image("./static\datasets\EDUAR.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**JORGE EDUARDO MUÑOZ QUINTERO**")
-    st.write("[Rol en el proyecto]")
+    st.write("Product Owner")
     
 with col3:
     st.image("./static\datasets\JHONATAN.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**JHONATAN RODRIGUEZ MUÑOZ**")
-    st.write("[Rol en el proyecto]")
+    st.write("Developer")
     
 with col4:
     st.image("./static\datasets\SERGIO.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**SERGIO MARENCO**")
-    st.write("[Rol en el proyecto]")
+    st.write("Developer")
     
     
 
 # Descripción del proyecto
 st.header("Sobre el Proyecto")
 st.write("""
-[Escribe aquí una breve descripción del proyecto, incluyendo el objetivo principal, la problemática que aborda y el enfoque que se utiliza. Puedes ser creativo y usar un lenguaje atractivo.]
+El Panel de Control de Asistencia de Empleados es una aplicación que permite al 
+Administrador gestionar y monitorear la asistencia de los empleados de manera eficiente. La aplicación está diseñada para centralizar el registro de asistencia, ausencias y tardanzas, y facilitar la generación de reportes detallados sobre la asistencia de los empleados.
 """)
 
 # Más información
