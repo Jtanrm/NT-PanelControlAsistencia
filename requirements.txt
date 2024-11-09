@@ -1,4 +1,4 @@
-altair==5.4.1
+altair==5.4.1pu
 attrs==24.2.0
 blinker==1.9.0
 CacheControl==0.14.1
