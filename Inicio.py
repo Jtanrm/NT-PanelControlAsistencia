@@ -87,7 +87,8 @@ st.write("""
 st.write("""
     Transparencia y responsabilidad de los empleados: El acceso a datos claros y en tiempo real fomenta la responsabilidad, ya que los empleados saben que su asistencia y puntualidad están siendo monitoreadas con precisión.
 """)
-
+st.header("Equipo instalado")
+st.video("https://www.youtube.com/watch?v=VEAtg3LtB0A")
 
 
 # Footer con links
