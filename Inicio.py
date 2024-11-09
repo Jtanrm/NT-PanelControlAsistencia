@@ -23,22 +23,22 @@ st.header("Nuestro Equipo")
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.image("./static\datasets\DANNY .jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static/images/DANNY .jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**DANNY EDISON IDARRAGA GOMEZ**")
     st.write(" Scrum Master")
 
 with col2:
-    st.image("./static\datasets\EDUAR.jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static/images/EDUAR.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**JORGE EDUARDO MUÑOZ QUINTERO**")
     st.write("Product Owner")
     
 with col3:
-    st.image("./static\datasets\JHONATAN.jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static/images/JHONATAN.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**JHONATAN RODRIGUEZ MUÑOZ**")
     st.write("Developer")
     
 with col4:
-    st.image("./static\datasets\SERGIO.jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image("./static/images/SERGIO.jpg", width=200)  # Reemplaza con la ruta de la foto
     st.write("**SERGIO MARENCO**")
     st.write("Developer")
     
@@ -47,8 +47,16 @@ with col4:
 # Descripción del proyecto
 st.header("Sobre el Proyecto Asistify")
 st.write("""
+
     Esta aplicación está diseñada para que los Administradores puedan gestionar y monitorear la asistencia de los empleados de forma eficiente y centralizada. La plataforma permite registrar la asistencia, ausencias y tardanzas de cada empleado, simplificando el proceso de seguimiento. Además, ofrece herramientas para generar reportes detallados, brindando una visión completa y en tiempo real sobre la puntualidad y el cumplimiento de horarios,
     lo que facilita la toma de decisiones informadas en la gestión de las personas.
+
+En una empresa con un número significativo de empleados, el Administrador enfrenta serias dificultades para gestionar la asistencia debido a registros manuales y hojas de cálculo. Esta falta de un sistema centralizado provoca errores en el cálculo de horas trabajadas y dificultades en la generación de reportes precisos. La necesidad de un sistema que permita el seguimiento eficiente y preciso de la asistencia se vuelve evidente para optimizar la gestión del personal y facilitar la toma de decisiones.
+
+    -   ¿Qué es el proyecto?
+                El Panel de Control de Asistencia de Empleados es una aplicación que permite al Administrador gestionar y monitorear la asistencia de los empleados de manera eficiente. La aplicación está diseñada para centralizar el registro de asistencia, ausencias y tardanzas, y facilitar la generación de reportes detallados sobre la asistencia de los empleados.
+    -   ¿Cuál es el objetivo principal?
+    -   ¿Por qué es importante?
 """)
 
 # Más información
