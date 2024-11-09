@@ -14,8 +14,8 @@ st.title("Panel de Control de Asistencia de Empleados")
 st.subheader("Asistify")
 
 # Imagen de fondo
-image = Image.open("./static/proyecto integrador.png") 
-st.image(image, width=700, use_column_width=True)  
+image = Image.open("./static\images\Asistify.png") 
+st.image(image, width=400, use_column_width=False)
 
 # Integrantes
 st.header("Nuestro Equipo")
@@ -95,7 +95,8 @@ st.write("""
 st.write("""
     Transparencia y responsabilidad de los empleados: El acceso a datos claros y en tiempo real fomenta la responsabilidad, ya que los empleados saben que su asistencia y puntualidad están siendo monitoreadas con precisión.
 """)
-
+st.header("Equipo instalado")
+st.video("https://www.youtube.com/watch?v=VEAtg3LtB0A")
 
 
 # Footer con links
