@@ -14,8 +14,8 @@ st.title("Panel de Control de Asistencia de Empleados")
 st.subheader("Asistify")
 
 # Imagen de fondo
-image = Image.open("./static/proyecto integrador.png") 
-st.image(image, width=700, use_column_width=True)  
+image = Image.open("./static\images\Asistify.png") 
+st.image(image, width=400, use_column_width=False)
 
 # Integrantes
 st.header("Nuestro Equipo")
