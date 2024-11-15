@@ -15,7 +15,8 @@ st.subheader("Fire Developer")
 
 # Imagen de fondo
 image = Image.open("./static/proyecto integrador.png") 
-st.image(image, width=700, use_column_width=True)  
+st.image(image, use_column_width=True)
+
 
 # Integrantes
 st.header("Nuestro Equipo")
