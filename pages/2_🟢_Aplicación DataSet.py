@@ -185,6 +185,25 @@ with tab_Filtro_Final_Dinámico:
         Este gráfico de barras muestra la cantidad de personas clasificadas por diferentes condiciones mentales 
         (Anxiety, Burnout, Depression, None) para la ubicación de trabajo seleccionada.
         """)
+        
+    if 'Mental_Health_Condition' in df.columns and 'Region' in df.columns:
+        st.write(f"Distribución de Condiciones Mentales por Región en {location}:")
+
+        # Filtramos las personas por la ubicación de trabajo
+        region_counts = filtered_df.groupby('Region')['Mental_Health_Condition'].count()
+
+        # Crear gráfico de barras
+        fig = px.bar(
+            region_counts, 
+            x=region_counts.index,  # Usamos las regiones para el eje X
+            y=region_counts.values,  # Usamos la cantidad de condiciones mentales para el eje Y
+            labels={'x': 'Región', 'y': 'Número de Personas'},  # Etiquetas de los ejes
+            title=f"Condiciones Mentales por Región en {location}",
+            color=region_counts.index,  # Opcional, asigna colores según la región
+        )
+
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig)
 
     # 10. Gráfico de dona para las regiones (continentes) y el porcentaje de personas con condiciones mentales
     if 'Mental_Health_Condition' in df.columns and 'Region' in df.columns:
