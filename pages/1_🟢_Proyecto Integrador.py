@@ -308,8 +308,13 @@ with tab_Análisis_Exploratorio:
     st.subheader("Cargar Datos")
     uploaded_file = st.file_uploader("Sube un archivo Excel", type=["xlsx"], key="file_uploader_exploratorio") # Clave única para este widget
     if uploaded_file is not None:
+        try:
         # Leer el archivo Excel
-        df = pd.read_excel(uploaded_file)
+            df = pd.read_excel(uploaded_file)
+        
+        except Exception as e:
+            st.error(f"Error al cargar el archivo: {e}")
+        
 
         # Actualizar los DataFrames con los datos del Excel
         df_empleados = df.copy()
@@ -432,117 +437,89 @@ with tab_Análisis_Exploratorio:
 #----------------------------------------------------------
 with tab_Filtro_Final_Dinámico:
     st.title("Filtro Final Dinámico")
-
     st.subheader("Filtro Final Dinámico")
 
-    # Define df como un DataFrame vacío al principio
-    df = pd.DataFrame()  
-
-    uploaded_file = st.file_uploader("Sube un archivo Excel", type=["xlsx"], key="file_uploader_dinamico") # Clave única para este widget
+    df = pd.DataFrame()  # DataFrame vacío inicial
+    uploaded_file = st.file_uploader("Sube un archivo Excel", type=["xlsx"], key="file_uploader_dinamico")
     if uploaded_file is not None:
-        # Leer el archivo Excel
-        df = pd.read_excel(uploaded_file) 
+        try:
+            df = pd.read_excel(uploaded_file)
 
-    # Filtros para el DataFrame
-    st.subheader("Filtros")
-    # Filtro por fecha
-    fecha_inicio = st.date_input("Fecha de inicio", datetime.now().date(), key="fecha_inicio")
-    fecha_fin = st.date_input("Fecha de fin", datetime.now().date(), key="fecha_fin")
+            st.subheader("Filtros")
+            # Filtro por fecha (con manejo de errores)
+            try:
+                fecha_inicio = st.date_input("Fecha de inicio", datetime.now().date(), key="fecha_inicio")
+                fecha_fin = st.date_input("Fecha de fin", datetime.now().date(), key="fecha_fin")
+                fecha_inicio = pd.to_datetime(fecha_inicio)
+                fecha_fin = pd.to_datetime(fecha_fin)
+            except ValueError as e:
+                st.error(f"Error en las fechas: {e}. Ingrese fechas válidas.")
 
-     # Seleccionar tipo de dato a filtrar
-    tipo_dato = st.selectbox("Tipo de dato", ["Asistencias", "Ausencias", "Reportes"], key="tipo_dato")
 
-    # Filtro por ciudad
-    ciudad_filtro = st.multiselect("Ciudad", list(df['ciudad'].unique()), key="ciudad_filtro")
+            tipo_dato = st.selectbox("Tipo de dato", ["Asistencias", "Ausencias", "Reportes"], key="tipo_dato")
 
-    # Aplicar filtros
-    df_filtrado = None
-    if tipo_dato == "Asistencias":
-        # Filtra los datos de asistencia
-        df_filtrado = df.copy()
-        # Convierte 'fechaContratacion' a datetime64[ns] usando el formato ISO 8601
-        df_filtrado['fechaContratacion'] = pd.to_datetime(df_filtrado['fechaContratacion'], format='ISO8601') 
+            ciudad_filtro = [] #Lista vacia por defecto
+            if 'ciudad' in df.columns:
+                ciudad_filtro = st.multiselect("Ciudad", list(df['ciudad'].unique()), key="ciudad_filtro")
+            else:
+                st.warning("La columna 'ciudad' no existe en el archivo. El filtro de ciudad no estará disponible.")
 
-        # Convierte 'fecha_inicio' y 'fecha_fin' a datetime
-        fecha_inicio = pd.to_datetime(fecha_inicio)
-        fecha_fin = pd.to_datetime(fecha_fin)
 
-        # Filtra por fecha
-        df_filtrado = df_filtrado[
-            (df_filtrado['fechaContratacion'] >= fecha_inicio) &
-            (df_filtrado['fechaContratacion'] <= fecha_fin)
-        ]
+            # Aplicar filtros
+            df_filtrado = df.copy()
+            try:
+                if 'fechaContratacion' in df_filtrado.columns:
+                    df_filtrado['fechaContratacion'] = pd.to_datetime(df_filtrado['fechaContratacion'])
+                    df_filtrado = df_filtrado[
+                        (df_filtrado['fechaContratacion'] >= fecha_inicio) &
+                        (df_filtrado['fechaContratacion'] <= fecha_fin)
+                    ]
+                else:
+                    st.warning("La columna 'fechaContratacion' no se encuentra. El filtrado por fecha no se aplicará.")
+            except (KeyError, ValueError) as e:
+                st.error(f"Error al filtrar por fecha: {e}")
 
-    elif tipo_dato == "Ausencias":
-        # Filtra los datos de ausencias
-        df_filtrado = df.copy()
-        # Convierte 'fechaContratacion' a datetime64[ns] usando el formato ISO 8601
-        df_filtrado['fechaContratacion'] = pd.to_datetime(df_filtrado['fechaContratacion'], format='ISO8601') 
+            if ciudad_filtro:
+                df_filtrado = df_filtrado[df_filtrado['ciudad'].isin(ciudad_filtro)]
 
-        # Convierte 'fecha_inicio' y 'fecha_fin' a datetime
-        fecha_inicio = pd.to_datetime(fecha_inicio)
-        fecha_fin = pd.to_datetime(fecha_fin)
+            # Mostrar resultados y generar gráficos
+            if not df_filtrado.empty:
+                st.write(f"**Criterios de filtrado:**")
+                st.write(f" - Fecha de inicio: {fecha_inicio}")
+                st.write(f" - Fecha de fin: {fecha_fin}")
+                st.write(f" - Ciudad: {ciudad_filtro}")
 
-        # Filtra por fecha
-        df_filtrado = df_filtrado[
-            (df_filtrado['fechaContratacion'] >= fecha_inicio) &
-            (df_filtrado['fechaContratacion'] <= fecha_fin)
-        ]
+                st.dataframe(df_filtrado)
+                st.subheader("Gráficos")
+                try:
+                    if tipo_dato == "Asistencias" or tipo_dato == "Ausencias":
+                        chart = alt.Chart(df_filtrado).mark_bar().encode(
+                            alt.X("ciudad:N"),
+                            alt.Y("count():Q")
+                        )
+                        st.altair_chart(chart, use_container_width=True)
+                    elif tipo_dato == "Reportes":
+                        chart = alt.Chart(df_filtrado).mark_bar().encode(
+                            alt.X("edad:Q"),
+                            alt.Y("count():Q")
+                        )
+                        st.altair_chart(chart, use_container_width=True)
 
-    elif tipo_dato == "Reportes":
-        # Filtra los datos de reportes
-        df_filtrado = df.copy()
-        # Convierte 'fechaContratacion' a datetime64[ns] usando el formato ISO 8601
-        df_filtrado['fechaContratacion'] = pd.to_datetime(df_filtrado['fechaContratacion'], format='ISO8601') 
+                        if 'edad' in df_filtrado.columns: #Verifica que exista la columna edad
+                            fig, ax = plt.subplots()
+                            sns.histplot(data=df_filtrado, x='edad', ax=ax)
+                            st.pyplot(fig)
 
-        # Convierte 'fecha_inicio' y 'fecha_fin' a datetime
-        fecha_inicio = pd.to_datetime(fecha_inicio)
-        fecha_fin = pd.to_datetime(fecha_fin)
+                        if 'edad' in df_filtrado.columns and 'ciudad' in df_filtrado.columns: #Verifica que existan las columnas
+                            sns.scatterplot(data=df_filtrado, x='edad', y='ciudad')
+                            st.pyplot()
 
-    # Filtra por fecha
-        df_filtrado = df_filtrado[
-            (df_filtrado['fechaContratacion'] >= fecha_inicio) &
-            (df_filtrado['fechaContratacion'] <= fecha_fin)
-        ]
+                except (KeyError, ValueError) as e:
+                    st.error(f"Error al generar gráficos: {e}. Revisa las columnas en tu archivo.")
+            else:
+                st.info("No hay datos que coincidan con los criterios de filtro.")
 
-    # Mostrar resumen dinámico del DataFrame filtrado
-    if df_filtrado is not None:
-        st.write(f"**Criterios de filtrado:**")
-        st.write(f" - Fecha de inicio: {fecha_inicio}")
-        st.write(f" - Fecha de fin: {fecha_fin}")
-        st.write(f" - Ciudad: {ciudad_filtro}")
-
-        # Mostrar el DataFrame filtrado
-        st.dataframe(df_filtrado)
-
-        # Gráfico de barras (ejemplo)
-        st.subheader("Gráfico de barras")
-        if tipo_dato == "Asistencias":
-            chart = alt.Chart(df_filtrado).mark_bar().encode(
-                alt.X("ciudad:N"),
-                alt.Y("count():Q")
-            )
-            st.altair_chart(chart, use_container_width=True)
-        elif tipo_dato == "Ausencias":
-            chart = alt.Chart(df_filtrado).mark_bar().encode(
-                alt.X("ciudad:N"),
-                alt.Y("count():Q")
-            )
-            st.altair_chart(chart, use_container_width=True)
-        elif tipo_dato == "Reportes":
-            chart = alt.Chart(df_filtrado).mark_bar().encode(
-                alt.X("edad:Q"),
-                alt.Y("count():Q")
-            )
-            st.altair_chart(chart, use_container_width=True)
-            
-        st.subheader("Histograma de Horas de Entrada")
-        fig, ax = plt.subplots()  # Crea un objeto de figura
-        sns.histplot(data=df_filtrado, x='edad', ax=ax)  # Dibuja el histograma en el objeto de figura
-        st.pyplot(fig)  # Muestra la figura en Streamlit
-            
-         # Gráfico de dispersión (ejemplo: relación entre totalAsistencias y totalAusencias)
-        st.subheader("Gráfico de Dispersión")
-        if tipo_dato == "Reportes":
-            sns.scatterplot(data=df_filtrado, x='edad', y='ciudad')
-            st.pyplot()
+        except Exception as e:
+            st.error(f"Error al procesar el archivo: {e}")
+    else:
+        st.info("Por favor, sube un archivo Excel.")
