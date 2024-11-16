@@ -1,127 +1,184 @@
 import streamlit as st
-import google.generativeai as genai
-import google.ai.generativelanguage as glm
-from dotenv import load_dotenv
 from PIL import Image
-import os
-import io
+import google.generativeai as genai
 
-load_dotenv()
+# Configurar la API de Google desde secrets
+genai.configure(api_key=st.secrets.GEMINI.api_key)
 
-import requests
-import pandas as pd
-import matplotlib.pyplot as plt
-from streamlit_folium import folium_static
-import folium
-import base64
+# Especificar la versión del modelo
+model = genai.GenerativeModel("gemini-1.5-flash")
 
-# Configura tu clave API de Google Gemini (obtén una clave API desde Google Cloud Platform)
-API_KEY = os.environ.get("GOOGLE_API_KEY")
-genai.configure(api_key=API_KEY)
+# Función para inicializar el modelo
+def get_model():
+    return genai.GenerativeModel("gemini-1.5-flash")
 
-st.image("../Google Gemini Logo.png", width=200)
-st.write("")
+# CSS personalizado (estilos integrados del Gemini Eco)
+st.markdown("""
+    <style>
+    .main {
+        padding: 1rem;
+    }
+    .stTitle {
+        text-align: center;
+        color: #2c3e50;
+        font-size: 2rem !important;
+        margin-bottom: 1rem !important;
+    }
+    .contenedor-principal {
+        background-color: #f8f9fa;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+    .caneca-card {
+        background-color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        height: 100%;
+        transition: all 0.3s ease;
+    }
+    .caneca-seleccionada {
+        transform: scale(1.02);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        border: 2px solid #4CAF50;
+    }
+    .icono-caneca {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    .ejemplos-lista {
+        font-size: 0.9rem;
+        color: #666;
+        margin: 0;
+        padding-left: 1.2rem;
+    }
+    .resultado {
+        text-align: center;
+        padding: 1rem;
+        border-radius: 10px;
+        margin: 1rem 0;
+        background-color: #e8f5e9;
+    }
+    .instrucciones {
+        background-color: #fff;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        border-left: 4px solid #2196F3;
+    }
+    .stButton button {
+        width: 100%;
+        height: 3rem;
+    }
+    div[data-testid="stVerticalBlock"] {
+        gap: 0.5rem;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
-gemini_pro, gemini_vision = st.tabs(["Gemini Pro", "Gemini Pro Vision"])
+# Tabs principales
+st.title("Gemini AI - Interactúa y Comenta Código")
 
-def main():
-    pass
+gemini_pro, gemini_vision, gemini_Eco, gemini_Travel = st.tabs(
+    ["Gemini Pro", "< Gemini code />", "Gemini Eco", "Gemini Traveling"]
+)
 
-if __name__ == "__main__":
-    main()
+# Tab para Gemini Pro
+with gemini_pro:
+    st.header("Interactuar con Gemini Pro")
+    user_input = st.text_input("Ingresa tu texto:")
+    if st.button("Generar"):
+        if user_input:
+            response = model.generate_content(user_input)
+            st.write("Respuesta:", response.text)
+        else:
+            st.warning("Por favor ingresa un texto.")
 
-# st.title('Planificador de Viajes Personalizado')
+# Tab para Comentador de Código
+with gemini_vision:
+    # Tab para Comentador de Código
+    st.title("Comentador de Código con Gemini")
 
-# # Descripción explicativa de la aplicación
-# descripcion = """
-# ### Descripción de la Aplicación: Planificador de Viajes Personalizado
+    ## Entrada directa de código
+    st.subheader("Introduce tu código:")
+    language_options = {
+        "Python": ("python", ".py"),
+        "JavaScript": ("javascript", ".js"),
+        "Java": ("java", ".java"),
+        "C++": ("cpp", ".cpp"),
+        "HTML": ("html", ".html"),
+        "Texto plano": ("plaintext", ".txt")
+    }
+    selected_language = st.selectbox("Selecciona el lenguaje:", list(language_options.keys()), index=0)
+    code_input = st.text_area("Escribe o pega tu código aquí:", height=300, placeholder="Escribe tu código aquí...")
 
-# ¡Bienvenidos a tu asistente de viajes inteligente! Esta aplicación está diseñada para ayudarte a planificar tu próximo viaje de manera fácil y rápida, adaptándose a tus intereses, presupuesto y preferencias. Aquí te explicamos qué puedes hacer con ella:
+    if st.button("Generar Comentarios"):
+        if code_input.strip() == "":
+            st.error("Por favor, introduce algún código antes de generar comentarios.")
+        else:
+            with st.spinner("Procesando..."):
+                try:
+                    # Generación de comentarios utilizando la API de Gemini
+                    prompt = f"Genera comentarios detallados para el siguiente código en {selected_language}:\n\n{code_input}"
+                    response = model.generate_content(prompt)
 
-# 1. **Planificación Personalizada**: Al ingresar tu destino, actividades preferidas, duración del viaje, presupuesto y tipo de clima que te gustaría disfrutar, la aplicación utiliza inteligencia artificial (IA) para generar un itinerario perfecto para ti. Este itinerario incluye sugerencias de actividades y lugares recomendados que se ajustan a tus elecciones.
+                    # Mostrar el código comentado
+                    commented_code = response.text
 
-# 2. **Filtros Avanzados**: Además de la planificación básica, podrás seleccionar filtros adicionales como preferencias de comida, opciones de transporte y lugares turísticos específicos. Esto permite personalizar aún más tu experiencia, asegurando que tu viaje sea justo como lo imaginaste.
+                    st.subheader("Código Comentado:")
+                    st.code(commented_code, language=language_options[selected_language][0])
 
-# 3. **Imágenes y Mapas Interactivos**: La aplicación también muestra una imagen del destino seleccionado para que tengas una mejor idea de lo que te espera. Además, ofrece mapas interactivos con puntos de interés recomendados, ayudándote a visualizar tu ruta y lugares destacados que no te puedes perder.
+                    # Descargar archivo con la extensión adecuada
+                    file_name = f"codigo_comentado{language_options[selected_language][1]}"
+                    st.download_button(
+                        label=f"Descargar Código Comentado ({file_name})",
+                        data=commented_code,
+                        file_name=file_name,
+                        mime="text/plain"
+                    )
+                    st.success(f"Código comentado generado correctamente. Se descargará como {file_name}.")
+                except Exception as e:
+                    st.error(f"Error: {e}")
 
-# 4. **Guardar Itinerarios**: Una vez que tengas tu itinerario generado, podrás descargarlo o guardarlo en formato PDF o como una lista de texto para llevarlo contigo y consultarlo durante tu viaje. 
 
-# ¡Con esta herramienta, organizar tu aventura nunca fue tan fácil y divertido! Prepárate para explorar nuevos destinos con el apoyo de la tecnología y tu propio gusto personal.
-# """
+# Tab para Gemini Eco
+with gemini_Eco:
+    st.header("Clasificador de Residuos")
+    datos_canecas = {
+        "reciclable": {"color": "blanco", "icono": "♻️", "descripcion": "Residuos reciclables como papel y plástico"},
+        "no reciclable": {"color": "negro", "icono": "⚫", "descripcion": "Residuos no reciclables como pañales"},
+        "orgánico": {"color": "verde", "icono": "🌱", "descripcion": "Residuos orgánicos como restos de comida"},
+    }
+    residuo = st.text_input("¿Qué quieres reciclar?")
+    if st.button("Clasificar"):
+        if residuo:
+            with st.spinner("Clasificando..."):
+                try:
+                    prompt = f"Clasifica este residuo: {residuo} como reciclable, no reciclable u orgánico."
+                    categoria = model.generate_content(prompt).text.lower().strip()
+                    if categoria in datos_canecas:
+                        st.success(f"El residuo va en la caneca {datos_canecas[categoria]['color']}.")
+                    else:
+                        st.error("No se pudo clasificar el residuo.")
+                except Exception as e:
+                    st.error(f"Error: {e}")
+        else:
+            st.warning("Por favor ingresa un residuo para clasificar.")
 
-# # Mostrar la descripción en la aplicación
-# st.markdown(descripcion)
-
-# # Función para obtener sugerencias de viaje con Gemini
-# def obtener_recomendaciones(destino, actividades, duracion, presupuesto, clima, comida, transporte, lugares):
-#     prompt = f"Recomienda un itinerario de {duracion} días en {destino} para alguien que prefiere {', '.join(actividades)}, con un presupuesto de {presupuesto} COP, un clima {clima}, opciones de comida {', '.join(comida)}, transporte {transporte}, y visitando lugares como {lugares}."
-    
-#     # URL de la API de Gemini
-#     url = "https://generativelanguage.googleapis.com/v1beta/models/gemini:generateText" 
-    
-#     headers = {'Content-Type': 'application/json',
-#                'Authorization': f'Bearer {API_KEY}'}
-    
-#     data = {
-#         "prompt": prompt,
-#         "temperature": 0.7,  # Ajusta la creatividad de la respuesta
-#         "max_output_tokens": 500,  # Limita la longitud del texto generado
-#         "top_k": 40, # Ajusta la diversidad de la respuesta
-#         "top_p": 0.95 # Ajusta la probabilidad de palabras usadas
-#     }
-
-#     try:
-#         response = requests.post(url, headers=headers, json=data)
-#         response.raise_for_status() # Maneja errores de red
-
-#         if response.status_code == 200:
-#             return response.json()["text"]
-#         else:
-#             st.error("Error al obtener recomendaciones. Intenta de nuevo más tarde.")
-#             return None
-#     except requests.exceptions.RequestException as e:
-#         st.error(f"Error al conectar con la API: {e}")
-#         return None
-
-# # Función para mostrar un mapa interactivo
-# def mostrar_mapa(lat, lon, lugares):
-#     mapa = folium.Map(location=[lat, lon], zoom_start=12)
-#     for lugar in lugares.split(","):
-#         folium.Marker([lat, lon], tooltip=lugar.strip()).add_to(mapa)
-#     folium_static(mapa)
-
-# # Función para descargar el itinerario como archivo de texto
-# def descargar_itinerario(itinerario_texto):
-#     b64 = base64.b64encode(itinerario_texto.encode()).decode()
-#     href = f'<a href="data:file/txt;base64,{b64}" download="itinerario.txt">Descargar Itinerario</a>'
-#     st.markdown(href, unsafe_allow_html=True)
-
-# # Título de la aplicación
-# st.title('Planificador de Viajes Personalizado')
-
-# # Entrada del usuario
-# destino = st.text_input("¿A dónde quieres viajar?")
-# actividades = st.multiselect("Selecciona tus intereses", ["Cultura", "Naturaleza", "Aventura", "Gastronomía"])
-# duracion = st.slider("Duración del viaje (días)", 1, 30, 7)
-# presupuesto = st.slider("Presupuesto (COP)", 100000, 10000000, 1000000, step=100000)
-# clima = st.selectbox("Clima preferido", ["Cálido", "Frío", "Templado"])
-# comida = st.multiselect("Preferencias de comida", ["Vegetariana", "Internacional", "Típica", "Comida rápida"])
-# transporte = st.selectbox("Preferencias de transporte", ["Público", "Taxi", "Alquiler de auto"])
-# lugares = st.text_area("Lugares turísticos específicos (separa por comas)")
-
-# # Botón para obtener recomendaciones
-# if st.button("Obtener Itinerario"):
-#     if destino and actividades:
-#         # Llamada a la API para obtener recomendaciones
-#         recomendacion = obtener_recomendaciones(destino, actividades, duracion, presupuesto, clima, comida, transporte, lugares)
-        
-#         if recomendacion:
-#             st.write("### Tu Itinerario Sugerido:")
-#             st.write(recomendacion)
-#             descargar_itinerario(recomendacion)  # Botón para descargar itinerario
-
-#             # Simulación de coordenadas (reemplaza esto con coordenadas reales del destino)
-#             lat, lon = 4.6097, -74.0817  # Ejemplo: Bogotá, Colombia
-#             mostrar_mapa(lat, lon, lugares)  # Muestra el mapa interactivo
-#     else:
-#         st.warning("Por favor, completa todos los campos para obtener recomendaciones.")
+# Tab para Gemini Traveling
+with gemini_Travel:
+    st.header("Planificador de Viajes Personalizado")
+    destino = st.text_input("Destino:")
+    duracion = st.number_input("Duración en días:", min_value=1, step=1)
+    actividades = st.text_area("Actividades preferidas (separadas por comas):")
+    if st.button("Planificar Viaje"):
+        with st.spinner("Planificando..."):
+            try:
+                prompt = f"Planifica un itinerario de {duracion} días para {destino} con actividades: {actividades}."
+                itinerario = model.generate_content(prompt).text
+                st.subheader("Itinerario:")
+                st.write(itinerario)
+                st.download_button("Descargar Itinerario", itinerario, "itinerario.txt")
+            except Exception as e:
+                st.error(f"Error: {e}")
