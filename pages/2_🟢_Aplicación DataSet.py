@@ -12,7 +12,7 @@ st.subheader("Análisis Exploratorio del Dataset: Impacto del Trabajo Remoto en 
 
 
 
-tad_descripcion, tab_Análisis_Exploratorio, tab_Filtrado_Básico, tab_Filtro_Final_Dinámico = st.tabs(["Descripción", "Análisis Exploratorio", "Filtrado Básico", "Filtro Final Dinámico"])
+tad_descripcion, tab_Análisis_Exploratorio,  tab_Filtro_Final_Dinámico = st.tabs(["Descripción", "Análisis Exploratorio", "Filtro Dinámico"])
 
 #----------------------------------------------------------
 #Generador de datos
@@ -45,30 +45,30 @@ Contiene datos sobre:
     ''')  
     
     # Cargar el dataset CSV
-current_dir = os.path.dirname(__file__)
-file_path = os.path.join(current_dir, "..", "static", "datasets", "Impact_of_Remote_Work_on_Mental_Health.csv")
+    current_dir = os.path.dirname(__file__)
+    file_path = os.path.join(current_dir, "..", "static", "datasets", "Impact_of_Remote_Work_on_Mental_Health.csv")
 
-@st.cache_data
-def load_data(file_path):
-    try:
-        return pd.read_csv(file_path)
-    except FileNotFoundError:
-        st.error("Archivo no encontrado. Verifica la ruta.")
-        return pd.DataFrame()  # Retorna un DataFrame vacío en caso de error
+    @st.cache_data
+    def load_data(file_path):
+        try:
+            return pd.read_csv(file_path)
+        except FileNotFoundError:
+            st.error("Archivo no encontrado. Verifica la ruta.")
+            return pd.DataFrame()  # Retorna un DataFrame vacío en caso de error
 
-df = load_data(file_path)
+    df = load_data(file_path)
 
-# Mostrar el DataFrame
-st.write("Vista General del Dataset:")
-st.dataframe(df)
+    # Mostrar el DataFrame
+    st.write("Vista General del Dataset:")
+    st.dataframe(df)
 
-# Verificar datos antes de continuar
-if df.empty:
-    st.warning("No se pudo cargar el dataset. Deteniendo análisis.")
-else:
-    # 1. Valores Faltantes
-    st.write("Valores faltantes por columna:")
-    st.write(df.isnull().sum())
+    # Verificar datos antes de continuar
+    if df.empty:
+        st.warning("No se pudo cargar el dataset. Deteniendo análisis.")
+    else:
+        # 1. Valores Faltantes
+        st.write("Valores faltantes por columna:")
+        st.write(df.isnull().sum())
 
     # 2. Estadísticas Descriptivas
     st.write("Estadísticas descriptivas:")
@@ -88,9 +88,6 @@ else:
         st.pyplot(plt)
         st.markdown(f"**Boxplot de {column}:** Este boxplot muestra la distribución de los valores de la variable {column}, incluyendo la media, los cuartiles y los valores atípicos.")
         plt.close()  
-
-
-
 #----------------------------------------------------------
 #Analítica 1
 #----------------------------------------------------------
@@ -133,6 +130,15 @@ with tab_Análisis_Exploratorio:
     st.write("Histograma de Nivel de Estrés:")
     if 'Stress_Level' in df.columns:
         plot_histogram('Stress_Level')
+    
+#----------------------------------------------------------
+#Analítica 3
+#----------------------------------------------------------
+with tab_Filtro_Final_Dinámico:
+    st.title("Filtro Dinámico")
+    st.markdown("""
+    Muestra un resumen dinámico del DataFrame filtrado.
+    """)
 
     # 7. Filtrado por Ubicación de Trabajo
     if 'Work_Location' in df.columns:
@@ -147,15 +153,79 @@ with tab_Análisis_Exploratorio:
     # 8. Análisis Bivariado - Promedio de Nivel de Estrés por Ubicación de Trabajo
     if 'Stress_Level' in df.columns and 'Work_Location' in df.columns:
         st.write("Promedio de Nivel de Estrés por Ubicación de Trabajo:")
-        location_stress = df.groupby("Work_Location")["Stress_Level"].mean()
-        st.bar_chart(location_stress)
-        st.markdown("**Promedio de Nivel de Estrés por Ubicación de Trabajo:** Este gráfico de barras muestra el promedio del nivel de estrés para cada ubicación de trabajo (Home u Office).")
-    
-with tab_Filtrado_Básico:
-    st.title("Filtro Básico")
-    st.markdown("""
-    Permite filtrar datos usando condiciones simples.
-    """)
+
+        # Agrupar por 'Work_Location' y 'Stress_Level' para contar los casos
+        stress_counts = filtered_df.groupby('Stress_Level')['Work_Location'].count()
+
+        # Crear gráfico de barras para mostrar el conteo de los niveles de estrés
+        st.bar_chart(stress_counts)
+
+        st.markdown("""
+        **Promedio de Nivel de Estrés por Ubicación de Trabajo:** 
+        Este gráfico de barras muestra el conteo de las personas clasificadas en diferentes niveles de estrés 
+        (Low, Medium, High) para la ubicación de trabajo seleccionada.
+        """)
+        
+    # 9. Gráfico de barras para las condiciones mentales filtrado por "Work_Location"
+    if 'Mental_Health_Condition' in df.columns:
+        st.write("Condiciones Mentales por Ubicación de Trabajo:")
+
+        # Contamos las frecuencias de las condiciones mentales
+        mental_conditions = filtered_df['Mental_Health_Condition'].value_counts()
+
+        # Convertimos a un DataFrame para usar st.bar_chart
+        mental_conditions_df = pd.DataFrame(mental_conditions).reset_index()
+        mental_conditions_df.columns = ['Condición Mental', 'Cantidad']
+
+        # Crear gráfico de barras con st.bar_chart
+        st.bar_chart(mental_conditions_df.set_index('Condición Mental')['Cantidad'])
+
+        st.markdown(""" 
+        **Condiciones Mentales por Ubicación de Trabajo:** 
+        Este gráfico de barras muestra la cantidad de personas clasificadas por diferentes condiciones mentales 
+        (Anxiety, Burnout, Depression, None) para la ubicación de trabajo seleccionada.
+        """)
+        
+    if 'Mental_Health_Condition' in df.columns and 'Region' in df.columns:
+        st.write(f"Distribución de Condiciones Mentales por Región en {location}:")
+
+        # Filtramos las personas por la ubicación de trabajo
+        region_counts = filtered_df.groupby('Region')['Mental_Health_Condition'].count()
+
+        # Crear gráfico de barras
+        fig = px.bar(
+            region_counts, 
+            x=region_counts.index,  # Usamos las regiones para el eje X
+            y=region_counts.values,  # Usamos la cantidad de condiciones mentales para el eje Y
+            labels={'x': 'Región', 'y': 'Número de Personas'},  # Etiquetas de los ejes
+            title=f"Condiciones Mentales por Región en {location}",
+            color=region_counts.index,  # Opcional, asigna colores según la región
+        )
+
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig)
+
+    # 10. Gráfico de dona para las regiones (continentes) y el porcentaje de personas con condiciones mentales
+    if 'Mental_Health_Condition' in df.columns and 'Region' in df.columns:
+        st.write(f"Distribución de Condiciones Mentales por Región en {location}:")
+
+        # Filtramos las personas por la ubicación de trabajo
+        condition_by_region = filtered_df.groupby('Region')['Mental_Health_Condition'].value_counts().unstack().fillna(0)
+
+        # Asegurarnos de que las regiones y condiciones mentales estén alineadas correctamente
+        condition_by_region = condition_by_region.stack().reset_index(name='Count')
+
+        # Crear el gráfico de dona con Plotly
+        fig = px.pie(
+            condition_by_region, 
+            names='Mental_Health_Condition',  # Usar la columna de condición mental como 'names'
+            values='Count',  # Usar la cantidad de cada condición mental como 'values'
+            title=f"Porcentaje de Condiciones Mentales por Región en {location}",
+            hole=0.3  # Esto crea el agujero en el centro, convirtiéndolo en una dona
+        )
+
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig)
 
     col1, col2 = st.columns(2)  # Removed the operator column
 
@@ -189,14 +259,6 @@ with tab_Filtrado_Básico:
     except (KeyError, ValueError, TypeError):
         st.error("Error en el filtro. Verifica la columna y el valor ingresado.")
 
-#----------------------------------------------------------
-#Analítica 3
-#----------------------------------------------------------
-with tab_Filtro_Final_Dinámico:
-    st.title("Filtro Final Dinámico")
-    st.markdown("""
-    Muestra un resumen dinámico del DataFrame filtrado.
-    """)
 
     if not filtered_df.empty:  
         st.write("Resumen del DataFrame filtrado:")
@@ -219,12 +281,3 @@ with tab_Filtro_Final_Dinámico:
         st.dataframe(filtered_df.describe())
     else:
         st.write("Aplica un filtro en la pestaña 'Filtro Básico' para ver el resumen.")
-
-
-
-
-    
-
-
-
-
