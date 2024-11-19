@@ -14,11 +14,16 @@ st.title("Panel de Control de Asistencia de Empleados")
 st.subheader("Asistify")
 
 # Imagen de fondo
+
 st.markdown("""
     <div style="text-align: center; margin: 20px 0;">
         <img src="./static\images\Asistifyimg.png" alt="Logo Asistify" style="width: 400px;">
     </div>
 """, unsafe_allow_html=True)
+=======
+image = Image.open("./static/images/Asistify.png")
+st.image(image, width=400, use_container_width=False)
+
 
 
 # Integrantes
