@@ -14,32 +14,52 @@ st.title("Panel de Control de Asistencia de Empleados")
 st.subheader("Asistify")
 
 # Imagen de fondo
+
+st.markdown("""
+    <div style="text-align: center; margin: 20px 0;">
+        <img src="./static\images\Asistifyimg.png" alt="Logo Asistify" style="width: 400px;">
+    </div>
+""", unsafe_allow_html=True)
+=======
 image = Image.open("./static/images/Asistify.png")
 st.image(image, width=400, use_container_width=False)
+
 
 
 # Integrantes
 st.header("Nuestro Equipo")
 
+# Función para redimensionar imágenes
+def resize_image(image_path, size=(200, 200)):
+    img = Image.open(image_path)
+    return img.resize(size)
+
+# Redimensionar imágenes
+danny_img = resize_image("./static/images/DANNY.jpg")
+eduar_img = resize_image("./static/images/EDUAR.jpg")
+jhonatan_img = resize_image("./static/images/JHONATAN.jpg")
+sergio_img = resize_image("./static/images/SERGIO.jpg")
+
+# Mostrar las imágenes y detalles
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    st.image("./static/images/DANNY .jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image(danny_img)
     st.write("**DANNY EDISON IDARRAGA GOMEZ**")
-    st.write(" Scrum Master")
+    st.write("Scrum Master")
 
 with col2:
-    st.image("./static/images/EDUAR.jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image(eduar_img)
     st.write("**JORGE EDUARDO MUÑOZ QUINTERO**")
     st.write("Product Owner")
-    
+
 with col3:
-    st.image("./static/images/JHONATAN.jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image(jhonatan_img)
     st.write("**JHONATAN RODRIGUEZ MUÑOZ**")
     st.write("Developer")
-    
+
 with col4:
-    st.image("./static/images/SERGIO.jpg", width=200)  # Reemplaza con la ruta de la foto
+    st.image(sergio_img)
     st.write("**SERGIO MARENCO**")
     st.write("Developer")
     
