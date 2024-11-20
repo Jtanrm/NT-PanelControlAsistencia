@@ -4,6 +4,8 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 import matplotlib.pyplot as plt
 import seaborn as sns
+import webbrowser
+
 
 st.set_page_config(layout="wide")
 
@@ -24,6 +26,13 @@ st.text('------------------------------------')
 
 st.text('Link archivo en Google Sheet')
 st.text('https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y/edit?usp=sharing')
+
+# Crear el botón
+if st.button('Abrir archivo en Google Sheets'):
+    # Abrir la URL cuando el botón es presionado
+    webbrowser.open('https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y/edit?usp=sharing')
+
+
 
 st.text('------------------------------------')
 
