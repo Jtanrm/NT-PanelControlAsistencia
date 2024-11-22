@@ -1,201 +1,381 @@
-import streamlit as st
+import os
 import pandas as pd
-from googleapiclient.discovery import build
-from google.oauth2 import service_account
+import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
-import webbrowser
-
+import plotly.express as px 
 
 st.set_page_config(layout="wide")
 
-st.subheader("Analizador de Datos de Google Sheets")
-
-st.markdown("""
-Este código lee datos de una hoja de cálculo de Google Sheets llamada "Sheet1", los procesa con Pandas y actualiza una segunda hoja llamada "Sheet2" con nuevos datos. La interfaz de usuario de Streamlit permite al usuario ingresar el ID de la hoja de cálculo y visualizar los datos procesados.            
-""")  
-
-st.markdown("""
-En este conjunto de datos la ciudadanía puede encontrará información del delito de hurto en Antioquia a través de las modalidades de motocicletas y automotores desde 01 de enero del año 2020 al 30 de abril del año 2024.
-
-Fuente: DIJIN - Policía Nacional. Cifras sujetas a variación, en proceso de integración y consolidación con información de fiscalía general de la nación.
-
-""")
-
-st.text('------------------------------------')
-
-st.text('Link archivo en Google Sheet')
-st.text('https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y/edit?usp=sharing')
-
-# Crear el botón
-if st.button('Abrir archivo en Google Sheets'):
-    # Abrir la URL cuando el botón es presionado
-    webbrowser.open('https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y/edit?usp=sharing')
+st.subheader("Análisis Exploratorio del Dataset: Impacto del Trabajo Remoto en la Salud Mental")
 
 
 
-st.text('------------------------------------')
 
-st.text('Id documento datos_proyecto')
-st.text('1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y') 
+tad_descripcion, tab_Análisis_Exploratorio,  tab_Filtro_Final_Dinámico = st.tabs(["Descripción", "Análisis Exploratorio", "Filtro Dinámico"])
 
-# Entrada del ID del documento de Google Sheets
-SPREADSHEET_ID = st.text_input("ID hoja de cálculo")
-RANGE1 = "Sheet1!A:O"
-RANGE2 = "Sheet2!A:O"
+#----------------------------------------------------------
+#Generador de datos
+#----------------------------------------------------------
+with tad_descripcion:      
 
-google_sheet_credentials = st.secrets["GOOGLE_SHEET_CREDENTIALS"]
-secrets_dict = google_sheet_credentials.to_dict()     
-creds = None
-creds = service_account.Credentials.from_service_account_info(secrets_dict, scopes=["https://www.googleapis.com/auth/spreadsheets"])
-service = build('sheets', 'v4', credentials=creds)
-sheet = service.spreadsheets()
+    st.markdown('''
+    ## Este dataset contiene información sobre el impacto del trabajo remoto en la salud mental. 
+Contiene datos sobre:
 
-def read_sheet():
-    """Lee los datos de la primera hoja."""
-    result = sheet.values().get(spreadsheetId=SPREADSHEET_ID, range=RANGE1).execute()
-    values = result.get('values', [])
-    df = pd.DataFrame(values[1:], columns=values[0])  # Asumiendo que la primera fila son los encabezados
+### Introducción
 
-    # Convertir la columna 'FECHA HECHO' a tipo datetime
-    df['FECHA HECHO'] = pd.to_datetime(df['FECHA HECHO'], format='%d/%m/%Y')
-    return df
+* **Ubicación de trabajo:** Indica si los empleados trabajan desde casa o en la oficina.
+* **Nivel de Estrés:**  Mide el nivel de estrés percibido por los empleados.
+* **Nivel de Satisfacción con el Trabajo:**  Mide la satisfacción de los empleados con su trabajo actual.
+* **Equilibrio entre la Vida Laboral y Personal:** Mide el equilibrio entre la vida laboral y personal percibido por los empleados.
 
-def update_sheet(df):
-    """Actualiza la segunda hoja con el DataFrame proporcionado."""
-    # Convertir todos los valores a string para evitar problemas de serialización
-    body = {'values': df.astype(str).values.tolist()}
-    result = sheet.values().update(
-        spreadsheetId=SPREADSHEET_ID, range=RANGE2,
-        valueInputOption="USER_ENTERED", body=body).execute()
-    return result
+### Desarrollo
 
-def clean_data(df):
-    """Convierte las columnas relevantes a tipo numérico y maneja errores."""
-    # Limpiar la columna 'CANTIDAD' para asegurarse de que es numérica
-    df['CANTIDAD'] = pd.to_numeric(df['CANTIDAD'], errors='coerce')  # Convierte y reemplaza errores con NaN
-    return df
+* **Work_Location:** Ubicación de trabajo (Home, Office)
+* **Stress_Level:** Nivel de estrés (1-5)
+* **Job_Satisfaction:** Nivel de satisfacción con el trabajo (1-5)
+* **Work_Life_Balance:** Equilibrio entre la vida laboral y personal (1-5) 
 
-def analyze_data(df):
-    """Realiza los análisis solicitados sobre el DataFrame y devuelve resultados con descripciones."""
-    results = []
+### Conclusión
 
-    # Limpiar los datos
-    df = clean_data(df)
-
-    # Asegurarse de que 'AÑO' exista como columna (extraer el año de 'FECHA HECHO')
-    df['AÑO'] = df['FECHA HECHO'].dt.year
-
-    # Análisis 1: 5 primeros Municipios con mayor número de HURTO AUTOMOTORES
-    hurto_automotores = df[df['TIPO DE HURTO'] == 'HURTO AUTOMOTORES']
-    hurto_automotores_municipio = hurto_automotores.groupby('MUNICIPIO')['CANTIDAD'].sum().reset_index()
-    top_5_hurtos_automotores = hurto_automotores_municipio.sort_values(by='CANTIDAD', ascending=False).head(5)
-    results.append(['Top 5 Municipios con Hurtos Automotores', top_5_hurtos_automotores.to_string(index=False)])
-
-     # Graficar los 3 primeros Municipios con mayor número de HURTO AUTOMOTORES
-    fig, ax = plt.subplots(figsize=(8, 5))
-    sns.barplot(data=top_5_hurtos_automotores, x='MUNICIPIO', y='CANTIDAD', ax=ax, palette='viridis')
-    ax.set_title('Top 5 Municipios con Hurtos Automotores')
-    st.pyplot(fig)
-
-    # Análisis 2: 5 primeros Municipios con mayor número de HURTO MOTOCICLETAS
-    hurto_motocicletas = df[df['TIPO DE HURTO'] == 'HURTO MOTOCICLETAS']
-    hurto_motocicletas_municipio = hurto_motocicletas.groupby('MUNICIPIO')['CANTIDAD'].sum().reset_index()
-    top_5_hurtos_motocicletas = hurto_motocicletas_municipio.sort_values(by='CANTIDAD', ascending=False).head(5)
-    results.append(['Top 5 Municipios con Hurtos Motocicletas', top_5_hurtos_motocicletas.to_string(index=False)])
-
-    # Graficar los 3 primeros Municipios con mayor número de HURTO MOTOCICLETAS
-    fig, ax = plt.subplots(figsize=(8, 5))
-    sns.barplot(data=top_5_hurtos_motocicletas, x='MUNICIPIO', y='CANTIDAD', ax=ax, palette='magma')
-    ax.set_title('Top 5 Municipios con Hurtos Motocicletas')
-    st.pyplot(fig)
-
-    # Análisis 3: Cuántos hurtos no se reportaron por año
-    hurto_no_reportado = df[df['ARMAS MEDIOS'] == 'SIN EMPLEO DE ARMAS']
-    hurto_no_reportado_anual = hurto_no_reportado.groupby('AÑO')['CANTIDAD'].sum().reset_index()
-    results.append(['Hurtos No Reportados por Año', hurto_no_reportado_anual.to_string(index=False)])
-
-     # Graficar los hurtos no reportados por año
-    fig, ax = plt.subplots(figsize=(8, 5))
-    sns.lineplot(data=hurto_no_reportado_anual, x='AÑO', y='CANTIDAD', ax=ax, marker='o', color='orange')
-    ax.set_title('Hurtos No Reportados por Año')
-    st.pyplot(fig)
-
-    # Análisis 4: Hurtos de automotores realizados con LLAVE MAESTRA por cada año
-    hurto_automotores_llave_maestra = hurto_automotores[hurto_automotores['ARMAS MEDIOS'] == 'LLAVE MAESTRA']
-    hurto_automotores_llave_maestra_anual = hurto_automotores_llave_maestra.groupby('AÑO')['CANTIDAD'].sum().reset_index()
-    results.append(['Hurtos Automotores con Llave Maestra por Año', hurto_automotores_llave_maestra_anual.to_string(index=False)])
-
-    # Graficar los hurtos de automotores con llave maestra por año
-    fig, ax = plt.subplots(figsize=(8, 5))
-    sns.lineplot(data=hurto_automotores_llave_maestra_anual, x='AÑO', y='CANTIDAD', ax=ax, marker='o', color='red')
-    ax.set_title('Hurtos Automotores con Llave Maestra por Año')
-    st.pyplot(fig)
-
-    # Análisis 5: Hurtos de automotores realizados con ARMA DE FUEGO por cada año
-    hurto_automotores_arma_fuego = hurto_automotores[hurto_automotores['ARMAS MEDIOS'] == 'ARMA DE FUEGO']
-    hurto_automotores_arma_fuego_anual = hurto_automotores_arma_fuego.groupby('AÑO')['CANTIDAD'].sum().reset_index()
-    results.append(['Hurtos Automotores con Arma de Fuego por Año', hurto_automotores_arma_fuego_anual.to_string(index=False)])
-
-     # Graficar los hurtos de automotores con arma de fuego por año
-    fig, ax = plt.subplots(figsize=(8, 5))
-    sns.lineplot(data=hurto_automotores_arma_fuego_anual, x='AÑO', y='CANTIDAD', ax=ax, marker='o', color='green')
-    ax.set_title('Hurtos Automotores con Arma de Fuego por Año')
-    st.pyplot(fig)
-
-    # Análisis 6: Hurtos de automotores realizados sin empleo de armas por cada año
-    hurto_automotores_sin_armas = hurto_automotores[hurto_automotores['ARMAS MEDIOS'] == 'SIN EMPLEO DE ARMAS']
-    hurto_automotores_sin_armas_anual = hurto_automotores_sin_armas.groupby('AÑO')['CANTIDAD'].sum().reset_index()
-    results.append(['Hurtos Automotores Sin Empleo de Armas por Año', hurto_automotores_sin_armas_anual.to_string(index=False)])
-
-    # Graficar los hurtos de automotores sin armas por año
-    fig, ax = plt.subplots(figsize=(8, 5))
-    sns.lineplot(data=hurto_automotores_sin_armas_anual, x='AÑO', y='CANTIDAD', ax=ax, marker='o', color='blue')
-    ax.set_title('Hurtos Automotores Sin Empleo de Armas por Año')
-    st.pyplot(fig)
-
-    # Análisis 7: Año con mayor número de hurtos de automotores
-    año_max_hurto_automotores = hurto_automotores.groupby('AÑO')['CANTIDAD'].sum().idxmax()
-    results.append(['Año con Mayor Número de Hurtos de Automotores', año_max_hurto_automotores])
-
-    # Análisis 8: Año con mayor número de hurtos de motocicletas
-    año_max_hurto_motocicletas = hurto_motocicletas.groupby('AÑO')['CANTIDAD'].sum().idxmax()
-    results.append(['Año con Mayor Número de Hurtos de Motocicletas', año_max_hurto_motocicletas])
-
-    # Análisis 9: Número de hurtos por tipo de arma/medio por cada año
-    hurtos_por_tipo_armas = df.groupby(['ARMAS MEDIOS', 'AÑO'])['CANTIDAD'].sum().reset_index()
-    hurtos_tipo_armas_interes = hurtos_por_tipo_armas[hurtos_por_tipo_armas['ARMAS MEDIOS'].isin(['SIN EMPLEO DE ARMAS', 'ARMA DE FUEGO', 'LLAVE MAESTRA'])]
-    results.append(['Número de Hurtos por Tipo de Arma/Medio por Año', hurtos_tipo_armas_interes.to_string(index=False)])
-
-    # Graficar los hurtos por tipo de arma/medio
-    fig, ax = plt.subplots(figsize=(10, 6))
-    sns.lineplot(data=hurtos_tipo_armas_interes, x='AÑO', y='CANTIDAD', hue='ARMAS MEDIOS', marker='o', ax=ax)
-    ax.set_title('Número de Hurtos por Tipo de Arma/Medio por Año')
-    st.pyplot(fig)
-
-    # Convertir resultados a DataFrame para visualización
-    results_df = pd.DataFrame(results, columns=['Descripción', 'Valor'])
+* Identificar las tendencias en la salud mental de los empleados en entornos de trabajo remotos.
+* Explorar la relación entre la ubicación de trabajo y el nivel de estrés, la satisfacción laboral y el equilibrio entre la vida laboral y personal. 
+* Proporcionar información para mejorar la gestión de la salud mental de los empleados en el contexto del trabajo remoto.
+    ''')  
     
-    return results_df
+    # Cargar el dataset CSV
+    current_dir = os.path.dirname(__file__)
+    file_path = os.path.join(current_dir, "..", "static", "datasets", "Impact_of_Remote_Work_on_Mental_Health.csv")
 
-# Botón para realizar el análisis
-if st.button("Analizar datos de Google Sheet"):
-    if SPREADSHEET_ID:
-        df = read_sheet()
-        if not df.empty:
-            st.header("Datos de la Hoja 1")
-            st.dataframe(df)
+    @st.cache_data
+    def load_data(file_path):
+        try:
+            return pd.read_csv(file_path)
+        except FileNotFoundError:
+            st.error("Archivo no encontrado. Verifica la ruta.")
+            return pd.DataFrame()  # Retorna un DataFrame vacío en caso de error
 
-            # Realizar el análisis
-            results_df = analyze_data(df)
-            st.header("Resultados del Análisis")
-            st.dataframe(results_df)
+    df = load_data(file_path)
 
-            # Actualizar la segunda hoja con los resultados
-            update_sheet(results_df)
-            st.success("Hoja actualizada con los resultados del análisis.")
+    # Mostrar el DataFrame
+    st.write("Vista General del Dataset:")
+    st.dataframe(df)
 
-        else:
-            st.warning("La hoja está vacía o no se pudo leer.")
+    # Verificar datos antes de continuar
+    if df.empty:
+        st.warning("No se pudo cargar el dataset. Deteniendo análisis.")
     else:
-        st.warning("Por favor, ingresa un ID de hoja de cálculo válido.")
+        # 1. Valores Faltantes
+        st.write("Valores faltantes por columna:")
+        st.write(df.isnull().sum())
+
+    # 2. Estadísticas Descriptivas
+    st.write("Estadísticas descriptivas:")
+    st.write(df.describe())
+
+    # Funciones para visualización
+    def plot_histogram(column):
+        plt.figure(figsize=(4, 2))
+        sns.histplot(df[column].dropna(), bins=20, kde=True)
+        st.pyplot(plt)
+        st.markdown(f"**Histograma de {column}:** Este histograma muestra la distribución de los valores de la variable {column}.")
+        plt.close()
+
+    def plot_boxplot(column):
+        plt.figure(figsize=(4, 2))
+        sns.boxplot(x=df[column].dropna())
+        st.pyplot(plt)
+        st.markdown(f"**Boxplot de {column}:** Este boxplot muestra la distribución de los valores de la variable {column}, incluyendo la media, los cuartiles y los valores atípicos.")
+        plt.close()  
+#----------------------------------------------------------
+#Analítica 1
+#----------------------------------------------------------
+with tab_Análisis_Exploratorio:    
+    st.title("Análisis Exploratorio") 
+    # 3. Distribución de Variables Numéricas
+    st.write("Distribución de variables numéricas:")
+    num_columns = df.select_dtypes(include=['float64', 'int64']).columns
+    for col in num_columns:
+        st.write(f"Distribución de {col}")
+        plot_histogram(col)
+        plot_boxplot(col)
+
+    # 4. Mapa de Calor de Correlaciones
+    st.write("Mapa de calor de correlaciones entre variables numéricas:")
+    num_df = df.select_dtypes(include=['float64', 'int64'])
+    corr = num_df.corr()
+
+    def plot_heatmap(corr):
+        plt.figure(figsize=(4, 2))
+        sns.heatmap(corr, annot=True, cmap='coolwarm', linewidths=0.5)
+        st.pyplot(plt)
+        st.markdown("**Mapa de calor de correlaciones:** Este mapa de calor muestra la correlación entre las variables numéricas del dataset. Las celdas más rojas indican una correlación positiva más fuerte, mientras que las celdas más azules indican una correlación negativa más fuerte.")
+        plt.close()
+
+    plot_heatmap(corr)
+
+    # 5. Visualización de Variables Categóricas
+    st.write("Distribución de variables categóricas:")
+    cat_columns = df.select_dtypes(include=['object']).columns
+    for col in cat_columns:
+        st.write(f"Frecuencia de {col}")
+        fig, ax = plt.subplots()
+        sns.countplot(data=df, y=col, ax=ax)
+        st.pyplot(fig)
+        st.markdown(f"**Frecuencia de {col}:** Este gráfico de barras muestra la frecuencia de cada categoría en la variable {col}.")
+        plt.close()
+
+    # 6. Histograma de Nivel de Estrés
+    st.write("Histograma de Nivel de Estrés:")
+    if 'Stress_Level' in df.columns:
+        plot_histogram('Stress_Level')
+    
+#----------------------------------------------------------
+#Analítica 3
+#----------------------------------------------------------
+with tab_Filtro_Final_Dinámico:
+    st.title("Filtro Dinámico")
+    st.markdown("""
+    Muestra un resumen dinámico del DataFrame filtrado.
+    """)
+
+    # 7. Filtrado por Ubicación de Trabajo
+    if 'Work_Location' in df.columns:
+        location = st.selectbox("Selecciona una ubicación para filtrar los datos", df['Work_Location'].dropna().unique())
+        filtered_df = df[df['Work_Location'] == location]
+        st.write("Datos filtrados por ubicación de trabajo seleccionada:")
+       # st.dataframe(filtered_df)
+
+    # Asegurarnos de que la columna 'Stress_Level' sea numérica
+    df['Stress_Level'] = pd.to_numeric(df['Stress_Level'], errors='coerce')
+
+    # 8. Análisis Bivariado - Promedio de Nivel de Estrés por Ubicación de Trabajo
+    if 'Stress_Level' in df.columns and 'Work_Location' in df.columns:
+        st.write("Promedio de Nivel de Estrés por Ubicación de Trabajo:")
+
+        # Agrupar por 'Work_Location' y 'Stress_Level' para contar los casos
+        stress_counts = filtered_df.groupby('Stress_Level')['Work_Location'].count()
+
+        # Crear gráfico de barras para mostrar el conteo de los niveles de estrés
+        st.bar_chart(stress_counts)
+
+        st.markdown("""
+        **Promedio de Nivel de Estrés por Ubicación de Trabajo:** 
+        Este gráfico de barras muestra el conteo de las personas clasificadas en diferentes niveles de estrés 
+        (Low, Medium, High) para la ubicación de trabajo seleccionada.
+        """)
+        
+    # 9. Gráfico de barras para las condiciones mentales filtrado por "Work_Location"
+    if 'Mental_Health_Condition' in df.columns:
+        st.write("Condiciones Mentales por Ubicación de Trabajo:")
+
+        # Contamos las frecuencias de las condiciones mentales
+        mental_conditions = filtered_df['Mental_Health_Condition'].value_counts()
+
+        # Convertimos a un DataFrame para usar st.bar_chart
+        mental_conditions_df = pd.DataFrame(mental_conditions).reset_index()
+        mental_conditions_df.columns = ['Condición Mental', 'Cantidad']
+
+        # Crear gráfico de barras con st.bar_chart
+        st.bar_chart(mental_conditions_df.set_index('Condición Mental')['Cantidad'])
+
+        st.markdown(""" 
+        **Condiciones Mentales por Ubicación de Trabajo:** 
+        Este gráfico de barras muestra la cantidad de personas clasificadas por diferentes condiciones mentales 
+        (Anxiety, Burnout, Depression, None) para la ubicación de trabajo seleccionada.
+        """)
+        
+    if 'Mental_Health_Condition' in df.columns and 'Region' in df.columns:
+        st.write(f"Distribución de Condiciones Mentales por Región en {location}:")
+
+        # Filtramos las personas por la ubicación de trabajo
+        region_counts = filtered_df.groupby('Region')['Mental_Health_Condition'].count()
+
+        # Crear gráfico de barras
+        fig = px.bar(
+            region_counts, 
+            x=region_counts.index,  # Usamos las regiones para el eje X
+            y=region_counts.values,  # Usamos la cantidad de condiciones mentales para el eje Y
+            labels={'x': 'Región', 'y': 'Número de Personas'},  # Etiquetas de los ejes
+            title=f"Condiciones Mentales por Región en {location}",
+            color=region_counts.index,  # Opcional, asigna colores según la región
+        )
+
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig)
+
+    # 10. Gráfico de dona para las regiones (continentes) y el porcentaje de personas con condiciones mentales
+    if 'Mental_Health_Condition' in df.columns and 'Region' in df.columns:
+        st.write(f"Distribución de Condiciones Mentales por Región en {location}:")
+
+        # Filtramos las personas por la ubicación de trabajo
+        condition_by_region = filtered_df.groupby('Region')['Mental_Health_Condition'].value_counts().unstack().fillna(0)
+
+        # Asegurarnos de que las regiones y condiciones mentales estén alineadas correctamente
+        condition_by_region = condition_by_region.stack().reset_index(name='Count')
+
+        # Crear el gráfico de dona con Plotly
+        fig = px.pie(
+            condition_by_region, 
+            names='Mental_Health_Condition',  # Usar la columna de condición mental como 'names'
+            values='Count',  # Usar la cantidad de cada condición mental como 'values'
+            title=f"Porcentaje de Condiciones Mentales por Región en {location}",
+            hole=0.3  # Esto crea el agujero en el centro, convirtiéndolo en una dona
+        )
+
+    # Mostrar el gráfico en Streamlit
+    st.plotly_chart(fig)
+
+    col1, col2 = st.columns(2)  # Removed the operator column
+
+    column_to_filter = col1.selectbox("Selecciona la columna:", df.columns)
+
+    # Determine input type based on column type
+    if pd.api.types.is_numeric_dtype(df[column_to_filter]):
+        filter_value = col2.number_input("Introduce el valor:", value=0)
+    elif pd.api.types.is_bool_dtype(df[column_to_filter]):
+        filter_value = col2.selectbox("Introduce el valor:", [True, False])
+    else:
+        filter_value = col2.text_input("Introduce el valor:")
+
+    try:
+        if filter_value is not None:
+            if pd.api.types.is_numeric_dtype(df[column_to_filter]) or pd.api.types.is_bool_dtype(df[column_to_filter]):
+                filter_condition = f"{column_to_filter} == {filter_value}"
+            else: #String type
+                filter_condition = f"{column_to_filter} == '{filter_value}'"
+
+            filtered_df = df.query(filter_condition)
+            st.dataframe(filtered_df)
+
+            # Add bar chart (only if appropriate)
+            if len(filtered_df) > 0 and not pd.api.types.is_numeric_dtype(df[column_to_filter]):
+                plt.figure(figsize=(6, 4))
+                sns.countplot(x=filtered_df[column_to_filter])
+                st.pyplot(plt)
+                plt.close()
+
+    except (KeyError, ValueError, TypeError):
+        st.error("Error en el filtro. Verifica la columna y el valor ingresado.")
+
+
+    if not filtered_df.empty:  
+        st.write("Resumen del DataFrame filtrado:")
+        st.dataframe(filtered_df)
+        
+       
+        st.write("Gráfico de barras:")
+        if 'Work_Location' in filtered_df.columns:
+            location_counts = filtered_df['Work_Location'].value_counts()
+            st.bar_chart(location_counts)
+
+        st.write("Gráfico de dona:")
+        if 'Work_Location' in filtered_df.columns:
+            fig = px.pie(values=filtered_df['Work_Location'].value_counts(), 
+                         names=filtered_df['Work_Location'].value_counts().index,
+                         title='Distribución de la Ubicación de Trabajo')
+            st.plotly_chart(fig)
+        
+        st.write("Estadísticas descriptivas:")
+        st.dataframe(filtered_df.describe())
+    else:
+        st.write("Aplica un filtro en la pestaña 'Filtro Básico' para ver el resumen.")
+
+#Grafico de distribuecion de edades por edad
+    st.subheader("Distribución de Afectados por Rangos de Edad")
+
+    if 'Age' in df.columns and 'Mental_Health_Condition' in df.columns:
+        # Filtrar datos con condiciones mentales distintas de "None"
+        affected_data = df[df['Mental_Health_Condition'] != "None"]
+
+        # Crear rangos de edad
+        bins = [0, 29, 45, float('inf')]
+        labels = ['18-29', '30-44', '46+']
+        affected_data['Age_Range'] = pd.cut(affected_data['Age'], bins=bins, labels=labels, right=True)
+
+        # Contar la cantidad de afectados por rango de edad
+        age_range_counts = affected_data['Age_Range'].value_counts()
+
+        # Crear el gráfico de dona
+        fig = px.pie(
+            names=age_range_counts.index, 
+            values=age_range_counts.values, 
+            title="Distribución por Rangos de Edad",
+            hole=0.4,
+            color_discrete_sequence=px.colors.qualitative.Pastel
+        )
+        st.plotly_chart(fig)
+    else:
+        st.warning("Las columnas necesarias para este análisis no están disponibles en el dataset.")
+
+
+    
+    # Filtro: Cantidad de mujeres y hombres afectados
+    st.subheader("Cantidad de Mujeres y Hombres Afectados")
+
+    if 'Gender' in df.columns and 'Mental_Health_Condition' in df.columns:
+        # Filtrar datos con condiciones mentales distintas de "None"
+        affected_data = df[df['Mental_Health_Condition'] != "None"]
+
+        # Contar afectados por género
+        gender_counts = affected_data['Gender'].value_counts()
+
+        # Crear gráfico de barras
+        fig = px.bar(
+            gender_counts, 
+            x=gender_counts.index, 
+            y=gender_counts.values, 
+            labels={'x': 'Género', 'y': 'Cantidad Afectada'},
+            title="Cantidad de Mujeres y Hombres Afectados",
+            color=gender_counts.index
+        )
+        st.plotly_chart(fig)
+    else:
+        st.warning("Las columnas necesarias para este análisis no están disponibles en el dataset.")
+
+    # Filtro: Trabajos con Hombres y Mujeres
+    st.subheader("Filtrar Trabajos por Género")
+
+    if 'Gender' in df.columns and 'Job_Role' in df.columns:
+        # Crear un selector para elegir el género
+        gender = st.radio("Selecciona el género:", ["Hombres", "Mujeres"])
+
+        # Filtrar datos por género seleccionado
+        if gender == "Hombres":
+            filtered_data = df[df['Gender'] == "Male"]
+            st.write("Trabajos ocupados por hombres:")
+        else:
+            filtered_data = df[df['Gender'] == "Female"]
+            st.write("Trabajos ocupados por mujeres:")
+
+        # Contar la cantidad de trabajos por rol
+        job_counts = filtered_data['Job_Role'].value_counts()
+
+        # Mostrar tabla y gráfico de barras
+        st.dataframe(job_counts.rename("Cantidad"))
+        st.bar_chart(job_counts)
+    else:
+        st.warning("Las columnas necesarias para este análisis no están disponibles en el dataset.")
+
+# Grafica de Comparativa entre hombres y mujeres en los roles de trabajo
+    st.subheader("Comparación de Trabajos por Género")
+
+    if 'Gender' in df.columns and 'Job_Role' in df.columns:
+        # Contar trabajos por género
+        job_gender_counts = df.groupby(['Job_Role', 'Gender']).size().reset_index(name='Count')
+
+        # Crear gráfica de barras agrupadas
+        fig = px.bar(
+            job_gender_counts,
+            x='Job_Role',
+            y='Count',
+            color='Gender',
+            barmode='group',
+            title="Comparación de Roles por Género",
+            labels={'Job_Role': 'Roles de Trabajo', 'Count': 'Cantidad'},
+            color_discrete_map={'Male': 'blue', 'Female': 'red'}
+        )
+        st.plotly_chart(fig)
+    else:
+        st.warning("Las columnas necesarias para este análisis no están disponibles en el dataset.")
