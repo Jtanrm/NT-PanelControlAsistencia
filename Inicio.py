@@ -17,7 +17,7 @@ st.subheader("Asistify")
 
 st.markdown("""
     <div style="text-align: center; margin: 20px 0;">
-        <img src="./static\images\Asistifyimg.png" alt="Logo Asistify" style="width: 400px;">
+        <img src="./static/images/Asistifyimg.png" alt="Logo Asistify" style="width: 400px;">
     </div>
 """, unsafe_allow_html=True)
 =======
