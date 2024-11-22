@@ -16,13 +16,15 @@ st.subheader("Asistify")
 # Imagen de fondo
 
 st.markdown("""
-    <div style="text-align: center; margin: 20px 0;">
-        <img src="./static/images/Asistifyimg.png" alt="Logo Asistify" style="width: 400px;">
-    </div>
 """, unsafe_allow_html=True)
-=======
-image = Image.open("./static/images/Asistify.png")
-st.image(image, width=400, use_container_width=False)
+# Cargar la imagen original
+image = Image.open("./static/images/logo3.png")
+
+# Redimensionar la imagen a 100x500 píxeles
+image_resized = image.resize((910, 500))  # (ancho, alto)
+
+# Mostrar la imagen redimensionada
+st.image(image_resized)
 
 
 
@@ -69,8 +71,8 @@ with col4:
 st.header("Sobre el Proyecto Asistify")
 st.write("Esta aplicación está diseñada para que los Administradores puedan gestionar y monitorear la asistencia de los empleados de forma eficiente y centralizada. La plataforma permite registrar la asistencia, ausencias y tardanzas de cada empleado, simplificando el proceso de seguimiento. Además, ofrece herramientas para generar reportes detallados, brindando una visión completa y en tiempo real sobre la puntualidad y el cumplimiento de horarios, lo que facilita la toma de decisiones informadas en la gestión de las personas. En una empresa con un número significativo de empleados, el Administrador enfrenta serias dificultades para gestionar la asistencia debido a registros manuales y hojas de cálculo. Esta falta de un sistema centralizado provoca errores en el cálculo de horas trabajadas y dificultades en la generación de reportes precisos. La necesidad de un sistema que permita el seguimiento eficiente y preciso de la asistencia se vuelve evidente para optimizar la gestión del personal y facilitar la toma de decisiones.")
 st.write("""¿Qué es el proyecto?
-El Panel de Control de Asistencia de Empleados es una aplicación que permite al Administrador gestionar y monitorear la asistencia de los empleados de manera eficiente. La aplicación está diseñada para centralizar el registro de asistencia, ausencias y tardanzas, y facilitar la generación de reportes detallados sobre la asistencia de los empleados.
- """)
+    El Panel de Control de Asistencia de Empleados es una aplicación que permite al Administrador gestionar y monitorear la asistencia de los empleados de manera eficiente. La aplicación está diseñada para centralizar el registro de asistencia, ausencias y tardanzas, y facilitar la generación de reportes detallados sobre la asistencia de los empleados.
+    """)
 
 
 # Más información
