@@ -5,6 +5,7 @@ from google.oauth2 import service_account
 import matplotlib.pyplot as plt
 import seaborn as sns
 import webbrowser
+from PIL import Image
 
 
 st.set_page_config(layout="wide")
@@ -14,6 +15,19 @@ st.subheader("Analizador de Datos de Google Sheets")
 st.markdown("""
 Este código lee datos de una hoja de cálculo de Google Sheets llamada "Sheet1", los procesa con Pandas y actualiza una segunda hoja llamada "Sheet2" con nuevos datos. La interfaz de usuario de Streamlit permite al usuario ingresar el ID de la hoja de cálculo y visualizar los datos procesados.            
 """)  
+
+# Imagen de fondo
+
+st.markdown("""
+""", unsafe_allow_html=True)
+# Cargar la imagen original
+image = Image.open("./static/images/dijin.png")
+
+# Redimensionar la imagen a 100x500 píxeles
+image_resized = image.resize((200, 200))  # (ancho, alto)
+
+# Mostrar la imagen redimensionada
+st.image(image_resized)
 
 st.markdown("""
 En este conjunto de datos la ciudadanía puede encontrará información del delito de hurto en Antioquia a través de las modalidades de motocicletas y automotores desde 01 de enero del año 2020 al 30 de abril del año 2024.
