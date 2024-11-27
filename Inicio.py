@@ -32,7 +32,7 @@ st.image(image_resized)
 st.header("Nuestro Equipo")
 
 # Función para redimensionar imágenes
-def resize_image(image_path, size=(200, 200)):
+def resize_image(image_path, size=(250, 250)):
     img = Image.open(image_path)
     return img.resize(size)
 
