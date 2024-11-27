@@ -13,10 +13,23 @@ import time
 import altair as alt
 import seaborn as sns
 import matplotlib.pyplot as plt
+from PIL import Image
 
 st.set_page_config(layout="wide")
 
 st.subheader("Proyecto Integrador")
+
+# Imagen de fondo
+st.markdown("""
+""", unsafe_allow_html=True)
+# Cargar la imagen original
+image = Image.open("./static/images/logo3.png")
+
+# Redimensionar la imagen a 100x500 píxeles
+image_resized = image.resize((710, 300))  # (ancho, alto)
+
+# Mostrar la imagen redimensionada
+st.image(image_resized)
 
 # Verificar si ya existe una instancia de la aplicación
 if not firebase_admin._apps:
@@ -38,31 +51,35 @@ asistencias_collection = db.collection('asistencias')
 ausencias_collection = db.collection('ausencias')
 reportes_collection = db.collection('reportes')
 
-tad_descripcion, tab_Generador, tab_datos, tab_Análisis_Exploratorio, tab_Filtro_Final_Dinámico = st.tabs(
-    ["Descripción", "Generador y eliminación de empleados", "Asistencias, Ausencias y Reportes", "Análisis Exploratorio", "Filtro Final Dinámico"]
+# tad_descripcion, tab_Generador, tab_datos, tab_Análisis_Exploratorio, tab_Filtro_Final_Dinámico = st.tabs(
+#     ["Descripción", "Generador y eliminación de empleados", "Asistencias, Ausencias y Reportes", "Análisis Exploratorio", "Filtro Final Dinámico"]
+# )
+
+tab_Generador, tab_datos, tab_Análisis_Exploratorio, tab_Filtro_Final_Dinámico = st.tabs(
+    ["Generador y eliminación de empleados", "Asistencias, Ausencias y Reportes", "Análisis Exploratorio", "Filtro Final Dinámico"]
 )
 
-#----------------------------------------------------------
-#Generador de datos
-#----------------------------------------------------------
-with tad_descripcion:
-    st.markdown('''
-    ### Introducción
-    -   ¿Qué es el proyecto?
-    -   ¿Cuál es el objetivo principal?
-    -   ¿Por qué es importante?
+# #----------------------------------------------------------
+# #Generador de datos
+# #----------------------------------------------------------
+# with tad_descripcion:
+#     st.markdown('''
+#     ### Introducción
+#     -   ¿Qué es el proyecto?
+#     -   ¿Cuál es el objetivo principal?
+#     -   ¿Por qué es importante?
 
-    ### Desarrollo
-    -   Explicación detallada del proyecto
-    -   Procedimiento utilizado
-    -   Resultados obtenidos
+#     ### Desarrollo
+#     -   Explicación detallada del proyecto
+#     -   Procedimiento utilizado
+#     -   Resultados obtenidos
 
-    ### Conclusión
-    -   Resumen de los resultados
-    -   Logros alcanzados
-    -   Dificultades encontradas
-    -   Aportes personales
-    ''')
+#     ### Conclusión
+#     -   Resumen de los resultados
+#     -   Logros alcanzados
+#     -   Dificultades encontradas
+#     -   Aportes personales
+#     ''')
 
 #----------------------------------------------------------
 #Generador de datos
