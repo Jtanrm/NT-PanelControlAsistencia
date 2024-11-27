@@ -5,6 +5,7 @@ from google.oauth2 import service_account
 import matplotlib.pyplot as plt
 import seaborn as sns
 import webbrowser
+import streamlit.components.v1 as components
 from PIL import Image
 
 
@@ -12,25 +13,12 @@ st.set_page_config(layout="wide")
 
 st.subheader("Analizador de Datos de Google Sheets")
 
-# Imagen de fondo
-st.markdown("""
-""", unsafe_allow_html=True)
-# Cargar la imagen original
-image_sheet = Image.open("./static/images/googlesheet.png")
-
-# Redimensionar la imagen a 100x500 píxeles
-image_resized = image_sheet.resize((310, 150))  # (ancho, alto)
-
-# Mostrar la imagen redimensionada
-st.image(image_resized)
-
 st.markdown("""
 Este código lee datos de una hoja de cálculo de Google Sheets llamada "Sheet1", los procesa con Pandas y actualiza una segunda hoja llamada "Sheet2" con nuevos datos. La interfaz de usuario de Streamlit permite al usuario ingresar el ID de la hoja de cálculo y visualizar los datos procesados.            
 """)  
 
-st.subheader("Analisis de hurtos de motocicletas y automotores en Antioquia")
-
 # Imagen de fondo
+
 st.markdown("""
 """, unsafe_allow_html=True)
 # Cargar la imagen original
@@ -59,15 +47,14 @@ st.text('https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUT
 #     # Abrir la URL cuando el botón es presionado
 #     webbrowser.open('https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y/edit?usp=sharing')
 
-
-st.markdown(
-    """
-    <a href="https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y/edit?usp=sharing" target="_blank">
-            Abrir archivo en Google Sheets
-    </a>
-    """, 
-    unsafe_allow_html=True
-)
+# Crear el botón
+if st.button('Abrir archivo en Google Sheets'):
+    # Crear un componente HTML con JavaScript para abrir la URL en una nueva ventana
+    components.html("""
+    <script type="text/javascript">
+        window.open('https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y/edit?usp=sharing', '_blank');
+    </script>
+    """)
 
 
 
