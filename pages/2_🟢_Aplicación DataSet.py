@@ -4,20 +4,31 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px 
+from PIL import Image
 
 st.set_page_config(layout="wide")
 
 st.subheader("Análisis Exploratorio del Dataset: Impacto del Trabajo Remoto en la Salud Mental")
 
+# Imagen de fondo
+st.markdown("""
+""", unsafe_allow_html=True)
+# Cargar la imagen original
+image_salud = Image.open("./static/images/saludMental.jpg")
+
+# Redimensionar la imagen a 100x500 píxeles
+image_resized = image_salud.resize((710, 200))  # (ancho, alto)
+
+# Mostrar la imagen redimensionada
+st.image(image_resized)
 
 
-
-tad_descripcion, tab_Análisis_Exploratorio,  tab_Filtro_Final_Dinámico = st.tabs(["Descripción", "Análisis Exploratorio", "Filtro Dinámico"])
+tab_descripcion, tab_Análisis_Exploratorio,  tab_Filtro_Final_Dinámico = st.tabs(["Descripción", "Análisis Exploratorio", "Filtro Dinámico"])
 
 #----------------------------------------------------------
 #Generador de datos
 #----------------------------------------------------------
-with tad_descripcion:      
+with tab_descripcion:      
 
     st.markdown('''
     ## Este dataset contiene información sobre el impacto del trabajo remoto en la salud mental. 
