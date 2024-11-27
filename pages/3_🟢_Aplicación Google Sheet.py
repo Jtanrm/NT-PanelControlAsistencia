@@ -5,7 +5,6 @@ from google.oauth2 import service_account
 import matplotlib.pyplot as plt
 import seaborn as sns
 import webbrowser
-import streamlit.components.v1 as components
 from PIL import Image
 
 
@@ -49,12 +48,15 @@ st.text('https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUT
 
 # Crear el botón
 if st.button('Abrir archivo en Google Sheets'):
-    # Crear un componente HTML con JavaScript para abrir la URL en una nueva ventana
-    components.html("""
-    <script type="text/javascript">
-        window.open('https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y/edit?usp=sharing', '_blank');
-    </script>
-    """)
+    # Crear un enlace HTML que se abrirá en una nueva pestaña
+    st.markdown(
+        """
+        <a href="https://docs.google.com/spreadsheets/d/1dVyVkVs4ax-dywYCvo0VCeyi4-yHiUTwMebZ0UyOW8Y/edit?usp=sharing" target="_blank">
+            Abrir archivo en Google Sheets
+        </a>
+        """, 
+        unsafe_allow_html=True
+    )
 
 
 
