@@ -446,38 +446,17 @@ with tab_Filtro_Final_Dinámico:
             df = pd.read_excel(uploaded_file)
 
             st.subheader("Filtros")
-            # Filtro por fecha (con manejo de errores)
-            try:
-                fecha_inicio = st.date_input("Fecha de inicio", datetime.now().date(), key="fecha_inicio")
-                fecha_fin = st.date_input("Fecha de fin", datetime.now().date(), key="fecha_fin")
-                fecha_inicio = pd.to_datetime(fecha_inicio)
-                fecha_fin = pd.to_datetime(fecha_fin)
-            except ValueError as e:
-                st.error(f"Error en las fechas: {e}. Ingrese fechas válidas.")
-
 
             tipo_dato = st.selectbox("Tipo de dato", ["Asistencias", "Ausencias", "Reportes"], key="tipo_dato")
 
-            ciudad_filtro = [] #Lista vacia por defecto
+            ciudad_filtro = []  # Lista vacía por defecto
             if 'ciudad' in df.columns:
                 ciudad_filtro = st.multiselect("Ciudad", list(df['ciudad'].unique()), key="ciudad_filtro")
             else:
                 st.warning("La columna 'ciudad' no existe en el archivo. El filtro de ciudad no estará disponible.")
 
-
-            # Aplicar filtros
+            # Aplicar filtros (solo filtro por ciudad)
             df_filtrado = df.copy()
-            try:
-                if 'fechaContratacion' in df_filtrado.columns:
-                    df_filtrado['fechaContratacion'] = pd.to_datetime(df_filtrado['fechaContratacion'])
-                    df_filtrado = df_filtrado[
-                        (df_filtrado['fechaContratacion'] >= fecha_inicio) &
-                        (df_filtrado['fechaContratacion'] <= fecha_fin)
-                    ]
-                else:
-                    st.warning("La columna 'fechaContratacion' no se encuentra. El filtrado por fecha no se aplicará.")
-            except (KeyError, ValueError) as e:
-                st.error(f"Error al filtrar por fecha: {e}")
 
             if ciudad_filtro:
                 df_filtrado = df_filtrado[df_filtrado['ciudad'].isin(ciudad_filtro)]
@@ -485,8 +464,6 @@ with tab_Filtro_Final_Dinámico:
             # Mostrar resultados y generar gráficos
             if not df_filtrado.empty:
                 st.write(f"**Criterios de filtrado:**")
-                st.write(f" - Fecha de inicio: {fecha_inicio}")
-                st.write(f" - Fecha de fin: {fecha_fin}")
                 st.write(f" - Ciudad: {ciudad_filtro}")
 
                 st.dataframe(df_filtrado)
@@ -505,12 +482,12 @@ with tab_Filtro_Final_Dinámico:
                         )
                         st.altair_chart(chart, use_container_width=True)
 
-                        if 'edad' in df_filtrado.columns: #Verifica que exista la columna edad
+                        if 'edad' in df_filtrado.columns:  # Verifica que exista la columna edad
                             fig, ax = plt.subplots()
                             sns.histplot(data=df_filtrado, x='edad', ax=ax)
                             st.pyplot(fig)
 
-                        if 'edad' in df_filtrado.columns and 'ciudad' in df_filtrado.columns: #Verifica que existan las columnas
+                        if 'edad' in df_filtrado.columns and 'ciudad' in df_filtrado.columns:  # Verifica que existan las columnas
                             sns.scatterplot(data=df_filtrado, x='edad', y='ciudad')
                             st.pyplot()
 
